@@ -37,6 +37,12 @@ bot.start(async (ctx) => {
   const greeting = `Welcome to Nuibe!\n\nI can help you browse products, answer FAQs, and show your orders.`;
   await ctx.reply(greeting, getMainKeyboard());
   await ctx.reply('Open the mini app in Telegram:', getShopButton());
+  if (await isAdmin(ctx.from.id)) {
+    await ctx.reply('Admin dashboard:', Markup.inlineKeyboard([[{
+      text: 'Open Admin Dashboard',
+      web_app: { url: `${getWebAppUrl()}/admin.html` },
+    }]]));
+  }
 });
 
 bot.command('shop', async (ctx) => {
@@ -111,8 +117,11 @@ bot.command('admin_orders', async (ctx) => {
 
 bot.command('admin_link', async (ctx) => {
   if (!(await isAdmin(ctx.from.id))) return ctx.reply('Admin access required.');
-  const baseUrl = process.env.ADMIN_URL || 'http://localhost:3000/admin.html';
-  await ctx.reply(`Open the admin dashboard:\n${baseUrl}?telegram_id=${ctx.from.id}`);
+  const url = `${getWebAppUrl()}/admin.html`;
+  await ctx.reply('Open the admin dashboard:', Markup.inlineKeyboard([[{
+    text: 'Open Admin Dashboard',
+    web_app: { url },
+  }]]));
 });
 
 async function configureBot() {
