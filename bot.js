@@ -115,22 +115,49 @@ bot.command('admin_link', async (ctx) => {
   await ctx.reply(`Open the admin dashboard:\n${baseUrl}?telegram_id=${ctx.from.id}`);
 });
 
+async function configureBot() {
+  const url = getWebAppUrl();
+  const commands = [
+    { command: 'start', description: 'Start the Nuibe bot' },
+    { command: 'shop', description: 'Open the mini app' },
+    { command: 'products', description: 'Browse latest items' },
+    { command: 'faq', description: 'Frequently asked questions' },
+    { command: 'orders', description: 'Your order status' },
+    { command: 'admin_orders', description: 'Admin: list recent orders' },
+    { command: 'admin_link', description: 'Admin: open admin dashboard' },
+    { command: 'help', description: 'Show help and quick commands' },
+  ];
+
+  await bot.telegram.setMyCommands(commands);
+  await bot.telegram.setMyDescription({ description: 'Nuibe mini shop inside Telegram — browse products, FAQ, orders, and admin tools.' });
+  await bot.telegram.setMyShortDescription({ short_description: 'Shop, FAQ, orders, and admin dashboard' });
+  await bot.telegram.setChatMenuButton({
+    menu_button: {
+      type: 'web_app',
+      text: 'Open Shop',
+      web_app: { url },
+    },
+  });
+}
+
 bot.launch().then(() => {
   console.log('Telegram bot is running');
   (async () => {
     try {
       const me = await bot.telegram.getMe();
       const botLink = `https://t.me/${me.username}`;
-      const webUrl = process.env.WEB_APP_URL || process.env.ADMIN_URL || 'https://nuibe-test.onrender.com';
+      const webUrl = getWebAppUrl();
       console.log('Bot URL:', botLink);
       console.log('Web app URL:', webUrl);
+
+      await configureBot();
 
       const adminIds = (process.env.ADMIN_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
       if (adminIds.length) {
         const text = `Web app is live: ${webUrl}\nOpen in Telegram: ${botLink}`;
         for (const id of adminIds) {
           try {
-            await bot.telegram.sendMessage(id, text);
+            await bot.telegram.sendMessage(id, text, getShopButton());
           } catch (err) {
             console.warn('Failed to notify admin', id, err && err.message);
           }
