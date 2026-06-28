@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Geist', system-ui, sans-serif; }
+  button { transition: transform 0.14s ease, opacity 0.14s ease, background 0.18s ease, box-shadow 0.18s ease; }
+  button:active { transform: scale(0.95); opacity: 0.92; }
+  input, button { font-family: inherit; }
+  .nu-scroll::-webkit-scrollbar { display: none; }
+  .nu-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+  @keyframes nuSheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes nuFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes nuToast { 0% { opacity: 0; transform: translate(-50%, 12px); } 12% { opacity: 1; transform: translate(-50%, 0); } 88% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 8px); } }
+  @keyframes nuRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</helmet>
+
+<div id="app" style="--ink:#241B15; --muted:#8C8073; --bg:{{ bgVar }}; --card:#FFFFFF; --line:rgba(36,27,21,0.09); --accent:{{ accentVar }}; --radius:{{ radiusVar }}; min-height:100dvh; width:100%; display:flex; align-items:center; justify-content:center; background:#E7DFD2; font-family:'Geist',sans-serif;">
+
+  <div class="nu-phone" style="position:relative; width:min(100vw,520px); max-width:520px; height:min(100dvh,920px); max-height:920px; background:var(--bg,#F4F0E8); overflow:hidden; display:flex; flex-direction:column; border-radius:26px; box-shadow:0 30px 80px -20px rgba(36,27,21,0.35);">
+
+    <!-- ============ HEADER ============ -->
+    <header style="flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; padding:18px 20px 12px; background:var(--bg,#F4F0E8);">
+      <button onClick="{{ goShop }}" style="display:flex; align-items:center; gap:7px; background:none; border:none; padding:0; cursor:pointer;">
+        <span style="font-family:'Newsreader',serif; font-style:italic; font-size:26px; line-height:1; color:var(--ink,#241B15); letter-spacing:-0.01em;">nuibe</span>
+        <span style="width:6px; height:6px; border-radius:50%; background:var(--accent,#B5896B); margin-top:6px;"></span>
+      </button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button onClick="{{ goSearch }}" aria-label="Search" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+        </button>
+        <button onClick="{{ goCart }}" aria-label="Bag" style="position:relative; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>
+          <sc-if value="{{ headerBadge }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute; top:-3px; right:-3px; min-width:17px; height:17px; padding:0 4px; display:flex; align-items:center; justify-content:center; background:var(--accent,#B5896B); color:#fff; font-size:10px; font-weight:600; font-family:'Geist Mono',monospace; border-radius:9px; border:2px solid var(--bg,#F4F0E8);">{{ cartCount }}</span>
+          </sc-if>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ SCROLL AREA ============ -->
+    <main class="nu-scroll" style="flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding-bottom:calc(150px + env(safe-area-inset-bottom));">
+
+      <!-- ===== SHOP ===== -->
+      <sc-if value="{{ isShop }}" hint-placeholder-val="{{ true }}">
+        <div style="animation:nuFade 0.4s ease;">
+          <!-- Hero -->
+          <div style="margin:4px 16px 0; border-radius:calc(var(--radius,18px) + 6px); overflow:hidden; position:relative; background:linear-gradient(150deg,#EFE7DB,#E4D6C6); min-height:330px;">
+            <div style="position:absolute; inset:0; background:radial-gradient(120% 80% at 80% 10%, rgba(255,255,255,0.5), transparent 60%);"></div>
+            <!-- Model photo, faded into the card -->
+            <img src="model/serum-model-1.jpg" alt="" style="position:absolute; top:0; right:0; width:74%; height:100%; object-fit:cover; object-position:34% 22%; opacity:0.92; -webkit-mask-image:linear-gradient(95deg, transparent 0%, rgba(0,0,0,0.5) 26%, #000 60%); mask-image:linear-gradient(95deg, transparent 0%, rgba(0,0,0,0.5) 26%, #000 60%);">
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(239,231,219,0.92) 4%, rgba(239,231,219,0.2) 34%, transparent 60%);"></div>
+            <div style="position:relative; padding:20px 20px 18px; display:flex; flex-direction:column; min-height:330px;">
+              <div>
+                <p style="margin:0 0 8px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#8A7B69;">Seoul · Est. 2023</p>
+                <h1 style="margin:0; font-family:'Newsreader',serif; font-weight:300; font-size:31px; line-height:1.1; color:var(--ink,#241B15); max-width:11ch; text-shadow:0 1px 12px rgba(239,231,219,0.6);">{{ t.hero_head }}</h1>
+              </div>
+              <div style="margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding-top:18px;">
+                <button onClick="{{ goShopGrid }}" style="display:inline-flex; align-items:center; gap:8px; padding:12px 19px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:999px; font-size:12px; font-weight:500; letter-spacing:0.04em; cursor:pointer;">
+                  {{ t.hero_discover }}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+                </button>
+                <button onClick="{{ heroOpen }}" aria-label="View Niacinamide Serum" style="display:flex; align-items:center; gap:11px; padding:8px 14px 8px 8px; background:rgba(255,255,255,0.72); border:1px solid rgba(255,255,255,0.8); border-radius:16px; cursor:pointer; backdrop-filter:blur(6px); box-shadow:0 8px 20px -10px rgba(36,27,21,0.35);">
+                  <img src="shots/serum-3126.jpg" alt="" style="width:50px; height:50px; object-fit:cover; border-radius:11px; display:block;">
+                  <span style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left;">
+                    <span style="font-family:'Geist Mono',monospace; font-size:8.5px; letter-spacing:0.16em; text-transform:uppercase; color:#9A8C7C;">{{ t.hero_bestseller }}</span>
+                    <span style="font-family:'Newsreader',serif; font-size:13px; line-height:1.1; color:var(--ink,#241B15);">Niacinamide Serum</span>
+                    <span style="font-size:11px; font-weight:500; color:var(--ink,#241B15);">{{ heroPrice }}</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category chips -->
+          <div id="grid" class="nu-scroll" style="display:flex; gap:8px; overflow-x:auto; padding:20px 16px 6px;">
+            <sc-for list="{{ categories }}" as="c" hint-placeholder-count="5">
+              <button onClick="{{ c.select }}" style="flex:0 0 auto; padding:9px 16px; border:1px solid var(--line); border-radius:999px; font-size:12.5px; font-weight:500; cursor:pointer; white-space:nowrap; transition:all 0.2s; {{ c.css }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+
+          <!-- Section label -->
+          <div id="grid-section" style="display:flex; align-items:baseline; justify-content:space-between; padding:14px 18px 12px;">
+            <h2 style="margin:0; font-family:'Newsreader',serif; font-style:italic; font-weight:400; font-size:21px; color:var(--ink,#241B15);">{{ gridTitle }}</h2>
+            <span style="font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ productCountLabel }}</span>
+          </div>
+
+          <!-- Product grid -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;">
+            <sc-for list="{{ products }}" as="p" hint-placeholder-count="6">
+              <div style="display:flex; flex-direction:column; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px); overflow:hidden;">
+                <button onClick="{{ p.open }}" style="position:relative; padding:0; border:none; background:#EFE7DB; cursor:pointer; aspect-ratio:1/1; overflow:hidden;">
+                  {{ p.thumb }}
+                  <sc-if value="{{ p.featured }}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute; top:8px; left:8px; padding:4px 8px; background:rgba(36,27,21,0.78); color:#F4F0E8; font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; border-radius:999px; backdrop-filter:blur(4px);">{{ p.featured }}</span>
+                  </sc-if>
+                  <span role="button" aria-label="Save to wishlist" onClick="{{ p.toggleWish }}" style="position:absolute; top:7px; right:7px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.82); border-radius:50%; cursor:pointer; backdrop-filter:blur(4px); box-shadow:0 2px 8px -2px rgba(36,27,21,0.25);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="{{ p.wishFill }}" stroke="{{ p.wishColor }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A3.5 3.5 0 0 0 12 6 3.5 3.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"></path></svg>
+                  </span>
+                </button>
+                <div style="padding:10px 11px 12px; display:flex; flex-direction:column; gap:5px; flex:1;">
+                  <p style="margin:0; font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ p.detail }}</p>
+                  <button onClick="{{ p.open }}" style="margin:0; text-align:left; background:none; border:none; padding:0; cursor:pointer; font-family:'Newsreader',serif; font-weight:400; font-size:15.5px; line-height:1.15; color:var(--ink,#241B15);">{{ p.title }}</button>
+                  <div style="margin-top:auto; padding-top:6px; display:flex; align-items:center; justify-content:space-between;">
+                    <span style="font-size:13px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums;">{{ p.priceLabel }}</span>
+                    <button onClick="{{ p.add }}" aria-label="Add to bag" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:50%; cursor:pointer;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- Editorial campaign band -->
+          <div style="margin:30px 16px 0; border-radius:calc(var(--radius,18px) + 6px); overflow:hidden; position:relative; background:#F0DDE2;">
+            <img src="model/cream-model-1.jpg" alt="nuibe campaign" style="width:100%; height:340px; object-fit:cover; object-position:50% 22%; display:block;">
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(36,27,21,0.62) 2%, rgba(36,27,21,0.12) 40%, transparent 66%);"></div>
+            <div style="position:absolute; left:0; right:0; bottom:0; padding:20px; display:flex; flex-direction:column; gap:14px;">
+              <div>
+                <p style="margin:0 0 7px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.78);">{{ t.camp_label }}</p>
+                <p style="margin:0; font-family:'Newsreader',serif; font-style:italic; font-weight:300; font-size:24px; line-height:1.22; color:#fff; max-width:18ch; text-shadow:0 2px 18px rgba(0,0,0,0.3);">{{ t.camp_quote }}</p>
+              </div>
+              <a href="https://www.instagram.com/nuibe_official/" target="_blank" rel="noopener" style="align-self:flex-start; display:inline-flex; align-items:center; gap:9px; padding:11px 17px; background:rgba(255,255,255,0.95); color:var(--ink,#241B15); text-decoration:none; border-radius:999px; font-size:12.5px; font-weight:600; backdrop-filter:blur(4px);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"></circle></svg>
+                Follow @nuibe_official
+              </a>
+            </div>
+          </div>
+
+          <!-- Philosophy strip -->
+          <div style="margin:18px 16px 8px; padding:24px 20px; background:var(--ink,#241B15); border-radius:calc(var(--radius,18px) + 4px); position:relative; overflow:hidden;">
+            <p style="margin:0 0 10px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#A4988A;">{{ t.ritual_label }}</p>
+            <p style="margin:0; font-family:'Newsreader',serif; font-style:italic; font-weight:300; font-size:22px; line-height:1.3; color:#F4F0E8;">{{ t.ritual_quote }}</p>
+            <a href="https://www.instagram.com/nuibe_official/" target="_blank" rel="noopener" style="margin-top:16px; display:inline-flex; align-items:center; gap:9px; padding:10px 16px; background:rgba(244,240,232,0.1); border:1px solid rgba(244,240,232,0.2); color:#F4F0E8; text-decoration:none; border-radius:999px; font-size:12px; font-weight:500;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"></circle></svg>
+              @nuibe_official
+            </a>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== SEARCH ===== -->
+      <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:8px 16px 0; animation:nuFade 0.3s ease;">
+          <div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--card,#fff); border:1px solid var(--line); border-radius:999px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8C8073" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+            <input value="{{ query }}" onInput="{{ onQuery }}" placeholder="{{ t.search_ph }}" style="flex:1; border:none; outline:none; background:none; font-family:'Geist',sans-serif; font-size:15px; color:var(--ink,#241B15);">
+            <sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ clearQuery }}" aria-label="Clear" style="width:22px; height:22px; display:flex; align-items:center; justify-content:center; background:#EFE7DB; border:none; border-radius:50%; cursor:pointer; color:var(--muted,#8C8073);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>
+              </button>
+            </sc-if>
+          </div>
+
+          <!-- Suggestion chips (no query) -->
+          <sc-if value="{{ showSuggest }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <p style="margin:22px 2px 10px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.search_popular }}</p>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="5">
+                  <button onClick="{{ s.go }}" style="padding:9px 15px; background:var(--card,#fff); border:1px solid var(--line); border-radius:999px; font-size:12.5px; color:var(--ink,#241B15); cursor:pointer;">{{ s.label }}</button>
+                </sc-for>
+              </div>
+              <p style="margin:26px 2px 12px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.search_best }}</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ popular }}" as="p" hint-placeholder-count="4">
+                  <button onClick="{{ p.open }}" style="display:flex; align-items:center; gap:13px; padding:9px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px); cursor:pointer; text-align:left;">
+                    <span style="flex:0 0 auto; width:52px; height:52px; border-radius:12px; overflow:hidden; background:#EFE7DB; display:block;">{{ p.thumb }}</span>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-family:'Newsreader',serif; font-size:15px; color:var(--ink,#241B15);">{{ p.title }}</div>
+                      <div style="font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted,#8C8073); margin-top:2px;">{{ p.detail }}</div>
+                    </div>
+                    <span style="font-size:13px; font-weight:600; color:var(--ink,#241B15);">{{ p.priceLabel }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Results -->
+          <sc-if value="{{ showResults }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <p style="margin:22px 2px 12px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ resultsLabel }}</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ searchResults }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:13px; padding:9px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px);">
+                    <button onClick="{{ p.open }}" style="padding:0; border:none; background:none; cursor:pointer;"><span style="display:block; width:54px; height:54px; border-radius:12px; overflow:hidden; background:#EFE7DB;">{{ p.thumb }}</span></button>
+                    <button onClick="{{ p.open }}" style="flex:1; min-width:0; text-align:left; background:none; border:none; padding:0; cursor:pointer;">
+                      <div style="font-family:'Newsreader',serif; font-size:15px; color:var(--ink,#241B15);">{{ p.title }}</div>
+                      <div style="font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted,#8C8073); margin-top:2px;">{{ p.detail }}</div>
+                    </button>
+                    <button onClick="{{ p.add }}" aria-label="Add" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:50%; cursor:pointer;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Empty -->
+          <sc-if value="{{ showNoResults }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center; padding:60px 20px;">
+              <p style="font-family:'Newsreader',serif; font-style:italic; font-size:20px; color:var(--ink,#241B15); margin:0 0 6px;">{{ t.search_none }}</p>
+              <p style="font-size:13px; color:var(--muted,#8C8073); margin:0;">Try “serum”, “mask” or “niacinamide”.</p>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== CART ===== -->
+      <sc-if value="{{ isCart }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:8px 16px 0; animation:nuFade 0.3s ease;">
+          <h2 style="margin:6px 2px 18px; font-family:'Newsreader',serif; font-style:italic; font-weight:400; font-size:26px; color:var(--ink,#241B15);">{{ t.cart_title }}</h2>
+
+          <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <sc-for list="{{ cart }}" as="i" hint-placeholder-count="2">
+                <div style="display:flex; gap:13px; padding:11px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px);">
+                  <span style="flex:0 0 auto; width:72px; height:72px; border-radius:13px; overflow:hidden; background:#EFE7DB; display:block;">{{ i.thumb }}</span>
+                  <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+                    <div style="display:flex; justify-content:space-between; gap:8px;">
+                      <div style="font-family:'Newsreader',serif; font-size:16px; color:var(--ink,#241B15); line-height:1.15;">{{ i.title }}</div>
+                      <button onClick="{{ i.remove }}" aria-label="Remove" style="background:none; border:none; padding:2px; cursor:pointer; color:var(--muted,#8C8073); height:fit-content;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                    <div style="font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted,#8C8073); margin-top:2px;">{{ i.detail }}</div>
+                    <div style="margin-top:auto; padding-top:8px; display:flex; align-items:center; justify-content:space-between;">
+                      <div style="display:flex; align-items:center; gap:2px; background:var(--bg,#F4F0E8); border-radius:999px; padding:3px;">
+                        <button onClick="{{ i.dec }}" aria-label="Decrease" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+                        </button>
+                        <span style="min-width:24px; text-align:center; font-size:13px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums;">{{ i.qty }}</span>
+                        <button onClick="{{ i.inc }}" aria-label="Increase" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                        </button>
+                      </div>
+                      <span style="font-size:14px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums;">{{ i.lineLabel }}</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- Summary -->
+            <div style="margin-top:18px; padding:16px 4px 4px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:9px;">
+              <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted,#8C8073);"><span>{{ t.cart_subtotal }}</span><span style="font-variant-numeric:tabular-nums;">{{ cartTotalLabel }}</span></div>
+              <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted,#8C8073);"><span>{{ t.cart_shipping }}</span><span>{{ t.cart_free }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:4px;"><span style="font-family:'Newsreader',serif; font-style:italic; font-size:18px; color:var(--ink,#241B15);">{{ t.cart_total }}</span><span style="font-size:18px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums;">{{ cartTotalLabel }}</span></div>
+            </div>
+          </sc-if>
+
+          <!-- Empty cart -->
+          <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center; padding:56px 20px;">
+              <div style="width:64px; height:64px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; color:var(--accent,#B5896B);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>
+              </div>
+              <p style="font-family:'Newsreader',serif; font-style:italic; font-size:21px; color:var(--ink,#241B15); margin:0 0 6px;">{{ t.cart_empty }}</p>
+              <p style="font-size:13px; color:var(--muted,#8C8073); margin:0 0 20px;">{{ t.cart_empty_sub }}</p>
+              <button onClick="{{ goShop }}" style="padding:12px 24px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:999px; font-size:13px; font-weight:500; cursor:pointer;">{{ t.cart_browse }}</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== PROFILE ===== -->
+      <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:8px 16px 0; animation:nuFade 0.3s ease;">
+          <div style="display:flex; align-items:center; gap:14px; padding:18px; background:var(--card,#fff); border:1px solid var(--line); border-radius:calc(var(--radius,18px) + 4px); margin-top:4px;">
+            <div style="width:54px; height:54px; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg,#EFE7DB,#DDCBB8); border-radius:50%; font-family:'Newsreader',serif; font-style:italic; font-size:24px; color:var(--ink,#241B15);">g</div>
+            <div style="flex:1;">
+              <div style="font-family:'Newsreader',serif; font-size:19px; color:var(--ink,#241B15);">{{ t.prof_welcome }}</div>
+              <div style="font-size:12px; color:var(--muted,#8C8073); margin-top:2px;">{{ t.prof_signin_sub }}</div>
+            </div>
+          </div>
+
+          <button onClick="{{ signIn }}" style="width:100%; margin-top:12px; display:flex; align-items:center; justify-content:center; gap:9px; padding:13px; background:#229ED9; color:#fff; border:none; border-radius:999px; font-size:13.5px; font-weight:500; cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21.94 4.3 18.7 19.6c-.24 1.08-.88 1.35-1.78.84l-4.9-3.62-2.37 2.28c-.26.26-.48.48-.98.48l.35-4.98 9.06-8.19c.4-.35-.09-.55-.6-.2L6.27 13.1l-4.83-1.51c-1.05-.33-1.07-1.05.22-1.55l18.9-7.28c.87-.32 1.64.2 1.36 1.54Z"></path></svg>
+            {{ t.prof_tg }}
+          </button>
+
+          <div style="margin-top:18px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px); overflow:hidden;">
+            <sc-for list="{{ menu }}" as="m" hint-placeholder-count="4">
+              <button onClick="{{ m.go }}" style="width:100%; display:flex; align-items:center; gap:14px; padding:15px 16px; background:none; border:none; border-bottom:1px solid var(--line); cursor:pointer; text-align:left;">
+                <span style="color:var(--accent,#B5896B); display:flex;">{{ m.icon }}</span>
+                <span style="flex:1; font-size:14.5px; color:var(--ink,#241B15);">{{ m.label }}</span>
+                <span style="font-family:'Geist Mono',monospace; font-size:11px; color:var(--muted,#8C8073);">{{ m.meta }}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B8A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+              </button>
+            </sc-for>
+          </div>
+
+          <a href="https://www.instagram.com/nuibe_official/" target="_blank" rel="noopener" style="margin-top:12px; width:100%; display:flex; align-items:center; gap:13px; padding:15px 16px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px); text-decoration:none; cursor:pointer;">
+            <span style="color:var(--accent,#B5896B); display:flex;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"></circle></svg>
+            </span>
+            <span style="flex:1; display:flex; flex-direction:column;">
+              <span style="font-size:14.5px; color:var(--ink,#241B15);">Instagram</span>
+              <span style="font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.06em; color:var(--muted,#8C8073); margin-top:2px;">@nuibe_official</span>
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B8A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M9 7h8v8"></path></svg>
+          </a>
+
+          <div style="text-align:center; padding:30px 20px 10px;">
+            <span style="font-family:'Newsreader',serif; font-style:italic; font-size:22px; color:var(--ink,#241B15);">nuibe</span>
+            <p style="margin:6px 0 0; font-family:'Geist Mono',monospace; font-size:9.5px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.prof_footer }}</p>
+          </div>
+        </div>
+      </sc-if>
+
+    </main>
+
+    <!-- ============ MAIN BUTTON (Telegram style) ============ -->
+    <sc-if value="{{ mbVisible }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; left:0; right:0; bottom:72px; padding:10px 16px 12px; background:linear-gradient(to top, var(--bg,#F4F0E8) 62%, transparent); z-index:30;">
+        <button onClick="{{ mbAction }}" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:15px; background:var(--accent,#B5896B); color:#fff; border:none; border-radius:14px; cursor:pointer; box-shadow:0 8px 22px -8px rgba(181,137,107,0.8);">
+          <span style="font-size:14.5px; font-weight:600; letter-spacing:0.01em;">{{ mbLabel }}</span>
+          <span style="opacity:0.85; font-size:13px; font-variant-numeric:tabular-nums;">{{ mbSub }}</span>
+        </button>
+      </div>
+    </sc-if>
+
+    <!-- ============ TAB BAR ============ -->
+    <nav style="position:absolute; left:0; right:0; bottom:0; height:68px; display:flex; align-items:stretch; background:rgba(244,240,232,0.92); backdrop-filter:blur(14px); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); z-index:40;">
+      <button onClick="{{ goShop }}" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:none; border:none; cursor:pointer; color:{{ shopColor }};">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path></svg>
+        <span style="font-size:10px; letter-spacing:0.02em;">{{ t.nav_shop }}</span>
+      </button>
+      <button onClick="{{ goSearch }}" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:none; border:none; cursor:pointer; color:{{ searchColor }};">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+        <span style="font-size:10px; letter-spacing:0.02em;">{{ t.nav_search }}</span>
+      </button>
+      <button onClick="{{ goCart }}" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:none; border:none; cursor:pointer; color:{{ cartColor }};">
+        <span style="position:relative; display:flex;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>
+          <sc-if value="{{ headerBadge }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute; top:-5px; right:-7px; min-width:15px; height:15px; padding:0 3px; display:flex; align-items:center; justify-content:center; background:var(--accent,#B5896B); color:#fff; font-size:9px; font-weight:600; font-family:'Geist Mono',monospace; border-radius:8px;">{{ cartCount }}</span>
+          </sc-if>
+        </span>
+        <span style="font-size:10px; letter-spacing:0.02em;">{{ t.nav_bag }}</span>
+      </button>
+      <button onClick="{{ goProfile }}" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:none; border:none; cursor:pointer; color:{{ profileColor }};">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"></circle><path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5"></path></svg>
+        <span style="font-size:10px; letter-spacing:0.02em;">{{ t.nav_profile }}</span>
+      </button>
+    </nav>
+
+    <!-- ============ PRODUCT DETAIL SHEET ============ -->
+    <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:60; display:flex; flex-direction:column; justify-content:flex-end;">
+        <div onClick="{{ closeDetail }}" style="position:absolute; inset:0; background:rgba(36,27,21,0.45); animation:nuFade 0.25s ease;"></div>
+        <div class="nu-scroll" style="position:relative; max-height:90%; overflow-y:auto; background:var(--bg,#F4F0E8); border-radius:26px 26px 0 0; animation:nuSheetUp 0.34s cubic-bezier(0.16,1,0.3,1); padding-bottom:96px;">
+          <div style="position:sticky; top:0; display:flex; justify-content:center; padding:10px 0 4px; background:var(--bg,#F4F0E8); z-index:2;">
+            <div style="width:40px; height:4px; border-radius:2px; background:rgba(36,27,21,0.18);"></div>
+            <button onClick="{{ closeDetail }}" aria-label="Close" style="position:absolute; right:14px; top:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <div style="margin:6px 16px 0;">
+            <div id="detail-gallery" class="nu-scroll" style="display:flex; gap:0; overflow-x:auto; scroll-snap-type:x mandatory; border-radius:20px; background:#EFE7DB; -webkit-overflow-scrolling:touch;">
+              <sc-for list="{{ detail.galleryEls }}" as="g" hint-placeholder-count="3">
+                {{ g.el }}
+              </sc-for>
+            </div>
+            <div class="nu-scroll" style="display:flex; gap:8px; margin-top:10px; overflow-x:auto; padding-bottom:2px;">
+              <sc-for list="{{ detail.galleryThumbs }}" as="th" hint-placeholder-count="3">
+                <button onClick="{{ th.select }}" aria-label="View photo" style="flex:0 0 auto; width:56px; height:56px; padding:0; border:1px solid var(--line); border-radius:13px; overflow:hidden; background:#EFE7DB; cursor:pointer;">
+                  {{ th.thumb }}
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:18px 20px 0;">
+            <p style="margin:0 0 8px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent,#B5896B);">{{ detail.category }}</p>
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:14px;">
+              <h2 style="margin:0; font-family:'Newsreader',serif; font-weight:400; font-size:27px; line-height:1.12; color:var(--ink,#241B15);">{{ detail.title }}</h2>
+              <span style="font-size:21px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums; white-space:nowrap;">{{ detail.priceLabel }}</span>
+            </div>
+            <p style="margin:4px 0 0; font-family:'Geist Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ detail.detail }}</p>
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;">
+              <sc-for list="{{ detail.tags }}" as="t" hint-placeholder-count="3">
+                <span style="padding:7px 13px; background:var(--card,#fff); border:1px solid var(--line); border-radius:999px; font-size:11.5px; color:var(--ink,#241B15);">{{ t }}</span>
+              </sc-for>
+            </div>
+
+            <p style="margin:18px 0 0; font-size:14px; line-height:1.6; color:#5C5247;">{{ detail.description }}</p>
+
+            <div style="margin-top:22px;">
+              <p style="margin:0 0 11px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.detail_actives }}</p>
+              <div style="display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden;">
+                <sc-for list="{{ detail.actives }}" as="a" hint-placeholder-count="4">
+                  <div style="display:flex; align-items:center; gap:11px; padding:12px 14px; background:var(--card,#fff);">
+                    <span style="flex:0 0 auto; width:6px; height:6px; border-radius:50%; background:var(--accent,#B5896B);"></span>
+                    <span style="font-size:13px; color:var(--ink,#241B15); line-height:1.3;">{{ a }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="margin-top:20px; padding:16px; background:var(--card,#fff); border:1px solid var(--line); border-radius:16px; display:flex; gap:13px; align-items:flex-start;">
+              <span style="color:var(--accent,#B5896B); margin-top:1px; display:flex;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="m5 8 2 2"></path><path d="m17 8-2 2"></path><path d="M12 22a6 6 0 0 0 6-6c0-3-2-5-3-7H9c-1 2-3 4-3 7a6 6 0 0 0 6 6Z"></path></svg>
+              </span>
+              <div>
+                <div style="font-size:13px; font-weight:600; color:var(--ink,#241B15);">{{ t.detail_promise_title }}</div>
+                <div style="font-size:12.5px; color:var(--muted,#8C8073); margin-top:2px; line-height:1.5;">{{ t.detail_promise_sub }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sticky sheet CTA -->
+          <div style="position:sticky; bottom:0; margin-top:20px; padding:12px 16px calc(14px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--bg,#F4F0E8) 70%, transparent); display:flex; gap:10px; align-items:center;">
+            <div style="display:flex; align-items:center; gap:2px; background:var(--card,#fff); border:1px solid var(--line); border-radius:999px; padding:5px;">
+              <button onClick="{{ detail.dec }}" aria-label="Decrease" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--bg,#F4F0E8); border:none; border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+              </button>
+              <span style="min-width:26px; text-align:center; font-size:14px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums;">{{ detailQty }}</span>
+              <button onClick="{{ detail.inc }}" aria-label="Increase" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--bg,#F4F0E8); border:none; border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+              </button>
+            </div>
+            <button onClick="{{ detail.addToBag }}" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:15px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:14px; cursor:pointer; font-size:14.5px; font-weight:600;">
+              {{ t.detail_add }} · {{ detailTotalLabel }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ SUB-PAGE OVERLAY ============ -->
+    <sc-if value="{{ subOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:70; background:var(--bg,#F4F0E8); display:flex; flex-direction:column; animation:nuSheetUp 0.32s cubic-bezier(0.16,1,0.3,1);">
+        <header style="flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:18px 18px 12px;">
+          <button onClick="{{ closeSub }}" aria-label="Back" style="width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          </button>
+          <h2 style="margin:0; font-family:'Newsreader',serif; font-weight:400; font-size:23px; color:var(--ink,#241B15);">{{ subTitle }}</h2>
+        </header>
+        <main class="nu-scroll" style="flex:1 1 auto; overflow-y:auto; padding:6px 18px 40px;">
+
+          <!-- ORDERS -->
+          <sc-if value="{{ isOrders }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <sc-if value="{{ ordersEmpty }}" hint-placeholder-val="{{ true }}">
+                <div style="text-align:center; padding:56px 20px;">
+                  <div style="width:62px; height:62px; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; color:var(--accent,#B5896B);">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 4 6v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4Z"></path><path d="M4 6h16"></path><path d="M9 10a3 3 0 0 0 6 0"></path></svg>
+                  </div>
+                  <p style="font-family:'Newsreader',serif; font-style:italic; font-size:20px; color:var(--ink,#241B15); margin:0 0 6px;">{{ t.orders_empty }}</p>
+                  <p style="font-size:13px; color:var(--muted,#8C8073); margin:0 0 20px;">{{ t.orders_empty_sub }}</p>
+                  <button onClick="{{ closeSub }}" style="padding:12px 24px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:999px; font-size:13px; font-weight:500; cursor:pointer;">{{ t.orders_shop }}</button>
+                </div>
+              </sc-if>
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                <sc-for list="{{ ordersList }}" as="o" hint-placeholder-count="0">
+                  <div style="background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px); padding:14px 15px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                      <span style="font-family:'Geist Mono',monospace; font-size:11px; letter-spacing:0.04em; color:var(--ink,#241B15);">{{ t.order_num }} #{{ o.id }}</span>
+                      <span style="font-family:'Geist Mono',monospace; font-size:10px; color:var(--muted,#8C8073);">{{ o.dateLabel }}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                      <sc-for list="{{ o.itemEls }}" as="it" hint-placeholder-count="1">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                          <span style="flex:0 0 auto; width:38px; height:38px; border-radius:9px; overflow:hidden; background:#EFE7DB; display:block;">{{ it.thumb }}</span>
+                          <span style="flex:1; font-size:13px; color:var(--ink,#241B15);">{{ it.line }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:11px; border-top:1px solid var(--line);">
+                      <span style="display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--accent,#B5896B);"><span style="width:6px; height:6px; border-radius:50%; background:var(--accent,#B5896B);"></span>{{ t.order_status }}</span>
+                      <span style="font-size:14px; font-weight:600; color:var(--ink,#241B15);">{{ o.totalLabel }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- WISHLIST -->
+          <sc-if value="{{ isWishlist }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <sc-if value="{{ wishEmpty }}" hint-placeholder-val="{{ true }}">
+                <div style="text-align:center; padding:56px 20px;">
+                  <div style="width:62px; height:62px; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; background:var(--card,#fff); border:1px solid var(--line); border-radius:50%; color:#D2566B;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A3.5 3.5 0 0 0 12 6 3.5 3.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"></path></svg>
+                  </div>
+                  <p style="font-family:'Newsreader',serif; font-style:italic; font-size:20px; color:var(--ink,#241B15); margin:0 0 6px;">{{ t.wish_empty }}</p>
+                  <p style="font-size:13px; color:var(--muted,#8C8073); margin:0 0 20px;">{{ t.wish_empty_sub }}</p>
+                  <button onClick="{{ closeSub }}" style="padding:12px 24px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:999px; font-size:13px; font-weight:500; cursor:pointer;">{{ t.wish_browse }}</button>
+                </div>
+              </sc-if>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ wishProducts }}" as="p" hint-placeholder-count="0">
+                  <div style="display:flex; align-items:center; gap:13px; padding:9px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px);">
+                    <button onClick="{{ p.open }}" style="padding:0; border:none; background:none; cursor:pointer;"><span style="display:block; width:58px; height:58px; border-radius:12px; overflow:hidden; background:#EFE7DB;">{{ p.thumb }}</span></button>
+                    <button onClick="{{ p.open }}" style="flex:1; min-width:0; text-align:left; background:none; border:none; padding:0; cursor:pointer;">
+                      <div style="font-family:'Newsreader',serif; font-size:15px; color:var(--ink,#241B15);">{{ p.title }}</div>
+                      <div style="font-size:13px; font-weight:600; color:var(--ink,#241B15); margin-top:3px;">{{ p.priceLabel }}</div>
+                    </button>
+                    <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+                      <button onClick="{{ p.toggleWish }}" aria-label="Remove" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--bg,#F4F0E8); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:#D2566B;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A3.5 3.5 0 0 0 12 6 3.5 3.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"></path></svg>
+                      </button>
+                      <button onClick="{{ p.add }}" aria-label="Add to bag" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:50%; cursor:pointer;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                      </button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- SKIN PROFILE -->
+          <sc-if value="{{ isSkin }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <!-- result -->
+              <sc-if value="{{ skinDone }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="padding:22px 20px; background:var(--ink,#241B15); border-radius:calc(var(--radius,18px) + 4px); margin-bottom:20px; position:relative; overflow:hidden;">
+                    <div style="position:absolute; inset:0; background:radial-gradient(120% 90% at 90% 0%, rgba(181,137,107,0.4), transparent 55%);"></div>
+                    <div style="position:relative;">
+                      <p style="margin:0 0 6px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#A4988A;">{{ t.skin_result_sub }}</p>
+                      <p style="margin:0 0 14px; font-family:'Newsreader',serif; font-style:italic; font-size:23px; line-height:1.2; color:#F4F0E8;">{{ t.skin_result_title }}</p>
+                      <div style="display:flex; flex-wrap:wrap; gap:7px;">
+                        <sc-for list="{{ skinSummary }}" as="tag" hint-placeholder-count="3">
+                          <span style="padding:6px 12px; background:rgba(244,240,232,0.12); border:1px solid rgba(244,240,232,0.22); border-radius:999px; font-size:11.5px; color:#F4F0E8;">{{ tag }}</span>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p style="margin:0 0 12px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.skin_routine_label }}</p>
+                  <div style="display:flex; flex-direction:column; gap:10px;">
+                    <sc-for list="{{ skinRoutine }}" as="p" hint-placeholder-count="3">
+                      <div style="display:flex; align-items:center; gap:13px; padding:10px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px);">
+                        <span style="flex:0 0 auto; width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--ink,#241B15); color:#F4F0E8; border-radius:50%; font-family:'Geist Mono',monospace; font-size:12px;">{{ p.stepNum }}</span>
+                        <button onClick="{{ p.open }}" style="flex:0 0 auto; padding:0; border:none; background:none; cursor:pointer;"><span style="display:block; width:54px; height:54px; border-radius:12px; overflow:hidden; background:#EFE7DB;">{{ p.thumb }}</span></button>
+                        <button onClick="{{ p.open }}" style="flex:1; min-width:0; text-align:left; background:none; border:none; padding:0; cursor:pointer;">
+                          <div style="font-family:'Geist Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent,#B5896B); margin-bottom:3px;">{{ p.stepLabel }}</div>
+                          <div style="font-family:'Newsreader',serif; font-size:15px; color:var(--ink,#241B15); line-height:1.15;">{{ p.title }}</div>
+                          <div style="font-size:12.5px; font-weight:600; color:var(--ink,#241B15); margin-top:3px;">{{ p.priceLabel }}</div>
+                        </button>
+                        <button onClick="{{ p.add }}" aria-label="Add to bag" style="flex:0 0 auto; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--bg,#F4F0E8); border:1px solid var(--line); border-radius:50%; cursor:pointer; color:var(--ink,#241B15);">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                        </button>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <button onClick="{{ addRoutineToBag }}" style="width:100%; margin-top:18px; display:flex; align-items:center; justify-content:center; gap:8px; padding:15px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:14px; font-size:14.5px; font-weight:600; cursor:pointer;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>
+                    {{ t.skin_add_all }}
+                  </button>
+                  <button onClick="{{ retakeSkin }}" style="width:100%; margin-top:10px; padding:13px; background:none; border:none; font-size:13px; font-weight:500; color:var(--muted,#8C8073); cursor:pointer; text-decoration:underline; text-underline-offset:3px;">{{ t.skin_retake }}</button>
+                </div>
+              </sc-if>
+              <!-- quiz -->
+              <sc-if value="{{ skinQuizOpen }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px;">
+                    <span style="font-family:'Geist Mono',monospace; font-size:11px; color:var(--muted,#8C8073);">{{ t.skin_step }} {{ skinStepNum }} {{ t.skin_of }} 3</span>
+                    <span style="flex:1; height:4px; background:var(--line); border-radius:2px; overflow:hidden;"><span style="display:block; height:100%; background:var(--accent,#B5896B); width:{{ skinProgress }};"></span></span>
+                  </div>
+                  <!-- step 0 -->
+                  <sc-if value="{{ skinStep0 }}" hint-placeholder-val="{{ true }}">
+                    <div>
+                      <h3 style="margin:0 0 16px; font-family:'Newsreader',serif; font-weight:400; font-size:21px; color:var(--ink,#241B15);">{{ t.skin_q1 }}</h3>
+                      <div style="display:flex; flex-direction:column; gap:9px;">
+                        <sc-for list="{{ skinTypes }}" as="o" hint-placeholder-count="5">
+                          <button onClick="{{ o.select }}" style="padding:14px 16px; text-align:left; border:1px solid var(--line); border-radius:14px; font-size:14.5px; cursor:pointer; {{ o.css }}">{{ o.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <!-- step 1 -->
+                  <sc-if value="{{ skinStep1 }}" hint-placeholder-val="{{ false }}">
+                    <div>
+                      <h3 style="margin:0 0 6px; font-family:'Newsreader',serif; font-weight:400; font-size:21px; color:var(--ink,#241B15);">{{ t.skin_q2 }}</h3>
+                      <p style="margin:0 0 16px; font-size:12.5px; color:var(--muted,#8C8073);">{{ t.skin_multi }}</p>
+                      <div style="display:flex; flex-wrap:wrap; gap:9px;">
+                        <sc-for list="{{ skinConcerns }}" as="o" hint-placeholder-count="6">
+                          <button onClick="{{ o.select }}" style="padding:11px 16px; border:1px solid var(--line); border-radius:999px; font-size:13.5px; cursor:pointer; {{ o.css }}">{{ o.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <!-- step 2 -->
+                  <sc-if value="{{ skinStep2 }}" hint-placeholder-val="{{ false }}">
+                    <div>
+                      <h3 style="margin:0 0 16px; font-family:'Newsreader',serif; font-weight:400; font-size:21px; color:var(--ink,#241B15);">{{ t.skin_q3 }}</h3>
+                      <div style="display:flex; flex-direction:column; gap:9px;">
+                        <sc-for list="{{ skinTimes }}" as="o" hint-placeholder-count="3">
+                          <button onClick="{{ o.select }}" style="padding:14px 16px; text-align:left; border:1px solid var(--line); border-radius:14px; font-size:14.5px; cursor:pointer; {{ o.css }}">{{ o.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <div style="display:flex; gap:10px; margin-top:24px;">
+                    <sc-if value="{{ skinCanBack }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ skinBack }}" style="flex:0 0 auto; padding:14px 20px; background:var(--card,#fff); border:1px solid var(--line); border-radius:14px; font-size:14px; color:var(--ink,#241B15); cursor:pointer;">{{ t.back }}</button>
+                    </sc-if>
+                    <sc-if value="{{ skinIsLast }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ saveSkin }}" disabled="{{ skinNextDisabled }}" style="flex:1; padding:15px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:14px; font-size:14.5px; font-weight:600; cursor:pointer; opacity:{{ skinNextOpacity }};">{{ t.skin_done }}</button>
+                    </sc-if>
+                    <sc-if value="{{ skinNotLast }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ skinNext }}" disabled="{{ skinNextDisabled }}" style="flex:1; padding:15px; background:var(--ink,#241B15); color:#F4F0E8; border:none; border-radius:14px; font-size:14.5px; font-weight:600; cursor:pointer; opacity:{{ skinNextOpacity }};">{{ t.skin_next }}</button>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- HELP -->
+          <sc-if value="{{ isHelp }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <p style="margin:2px 0 12px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.help_faq }}</p>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ faqList }}" as="f" hint-placeholder-count="6">
+                  <div style="background:var(--card,#fff); border:1px solid var(--line); border-radius:14px; overflow:hidden;">
+                    <button onClick="{{ f.toggle }}" style="width:100%; display:flex; align-items:center; gap:12px; padding:15px 16px; background:none; border:none; cursor:pointer; text-align:left;">
+                      <span style="flex:1; font-size:14px; font-weight:500; color:var(--ink,#241B15); line-height:1.3;">{{ f.q }}</span>
+                      <span style="flex:0 0 auto; font-size:18px; color:var(--accent,#B5896B); width:18px; text-align:center;">{{ f.sign }}</span>
+                    </button>
+                    <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                      <p style="margin:0; padding:0 16px 16px; font-size:13px; line-height:1.6; color:#5C5247;">{{ f.a }}</p>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+
+              <p style="margin:26px 0 12px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted,#8C8073);">{{ t.help_contact }}</p>
+              <p style="margin:0 0 14px; font-size:13px; color:var(--muted,#8C8073);">{{ t.help_contact_sub }}</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <a href="https://t.me/nuibe_official" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:13px; padding:14px 16px; background:var(--card,#fff); border:1px solid var(--line); border-radius:14px; text-decoration:none; color:var(--ink,#241B15);">
+                  <span style="color:#229ED9; display:flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21.94 4.3 18.7 19.6c-.24 1.08-.88 1.35-1.78.84l-4.9-3.62-2.37 2.28c-.26.26-.48.48-.98.48l.35-4.98 9.06-8.19c.4-.35-.09-.55-.6-.2L6.27 13.1l-4.83-1.51c-1.05-.33-1.07-1.05.22-1.55l18.9-7.28c.87-.32 1.64.2 1.36 1.54Z"></path></svg></span>
+                  <span style="flex:1; font-size:14px;">{{ t.help_tg }}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B8A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M9 7h8v8"></path></svg>
+                </a>
+                <a href="https://www.instagram.com/nuibe_official/" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:13px; padding:14px 16px; background:var(--card,#fff); border:1px solid var(--line); border-radius:14px; text-decoration:none; color:var(--ink,#241B15);">
+                  <span style="color:var(--accent,#B5896B); display:flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"></circle></svg></span>
+                  <span style="flex:1; font-size:14px;">{{ t.help_ig }}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B8A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M9 7h8v8"></path></svg>
+                </a>
+                <a href="mailto:hello@nuibe.co" style="display:flex; align-items:center; gap:13px; padding:14px 16px; background:var(--card,#fff); border:1px solid var(--line); border-radius:14px; text-decoration:none; color:var(--ink,#241B15);">
+                  <span style="color:var(--accent,#B5896B); display:flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg></span>
+                  <span style="flex:1; font-size:14px;">{{ t.help_email }}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B8A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M9 7h8v8"></path></svg>
+                </a>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- PRIVACY & LEGAL -->
+          <sc-if value="{{ isPrivacy }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <p style="margin:0 0 18px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.12em; color:var(--muted,#8C8073);">{{ t.privacy_updated }}</p>
+              <div style="display:flex; flex-direction:column; gap:18px;">
+                <sc-for list="{{ privacyList }}" as="p" hint-placeholder-count="7">
+                  <div>
+                    <h3 style="margin:0 0 6px; font-family:'Newsreader',serif; font-weight:500; font-size:17px; color:var(--ink,#241B15);">{{ p.h }}</h3>
+                    <p style="margin:0; font-size:13px; line-height:1.6; color:#5C5247;">{{ p.b }}</p>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="margin-top:26px; padding:18px; background:var(--card,#fff); border:1px solid var(--line); border-radius:var(--radius,18px);">
+                <p style="margin:0 0 14px; font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent,#B5896B);">{{ t.legal_title }}</p>
+                <div style="display:flex; flex-direction:column; gap:11px;">
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_company }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right;">{{ legal.company }}</span></div>
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_rep }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right;">{{ legal.rep }}</span></div>
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_addr }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right;">{{ legal.addr }}</span></div>
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_biz }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right; font-family:'Geist Mono',monospace;">{{ legal.biz }}</span></div>
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_mail }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right; font-family:'Geist Mono',monospace;">{{ legal.mail }}</span></div>
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_contact }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right; font-family:'Geist Mono',monospace;">{{ legal.contact }}</span></div>
+                  <div style="display:flex; justify-content:space-between; gap:14px;"><span style="font-size:12.5px; color:var(--muted,#8C8073);">{{ t.legal_email }}</span><span style="font-size:12.5px; color:var(--ink,#241B15); text-align:right;">{{ legal.email }}</span></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- LANGUAGE -->
+          <sc-if value="{{ isLanguage }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <p style="margin:2px 0 14px; font-size:13px; color:var(--muted,#8C8073);">{{ t.lang_sub }}</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ langs }}" as="l" hint-placeholder-count="4">
+                  <button onClick="{{ l.select }}" style="display:flex; align-items:center; gap:13px; padding:16px; border:1px solid var(--line); border-radius:14px; cursor:pointer; {{ l.css }}">
+                    <span style="flex:1; text-align:left; font-size:15px;">{{ l.native }}</span>
+                    <span style="font-family:'Geist Mono',monospace; font-size:11px; opacity:0.7;">{{ l.label }}</span>
+                    <sc-if value="{{ l.active }}" hint-placeholder-val="{{ false }}">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                    </sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- CURRENCY -->
+          <sc-if value="{{ isCurrency }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <p style="margin:2px 0 14px; font-size:13px; color:var(--muted,#8C8073);">{{ t.currency_sub }}</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ currencies }}" as="c" hint-placeholder-count="4">
+                  <button onClick="{{ c.select }}" style="display:flex; align-items:center; gap:13px; padding:16px; border:1px solid var(--line); border-radius:14px; cursor:pointer; {{ c.css }}">
+                    <span style="flex:0 0 auto; width:34px; font-family:'Newsreader',serif; font-size:19px; text-align:left;">{{ c.symbol }}</span>
+                    <span style="flex:1; display:flex; flex-direction:column; align-items:flex-start; gap:2px;">
+                      <span style="font-size:15px;">{{ c.label }}</span>
+                      <span style="font-family:'Geist Mono',monospace; font-size:10.5px; opacity:0.7;">{{ c.code }} · {{ c.sample }}</span>
+                    </span>
+                    <sc-if value="{{ c.active }}" hint-placeholder-val="{{ false }}">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                    </sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <p style="margin:18px 2px 0; font-size:11.5px; line-height:1.5; color:var(--muted,#8C8073);">Prices are converted from USD at indicative rates for display. You’ll be charged in the store’s settlement currency at checkout.</p>
+            </div>
+          </sc-if>
+
+        </main>
+      </div>
+    </sc-if>
+
+    <!-- ============ TOAST ============ -->
+    <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; left:50%; bottom:150px; transform:translateX(-50%); z-index:80; padding:11px 18px; background:var(--ink,#241B15); color:#F4F0E8; border-radius:999px; font-size:13px; font-weight:500; white-space:nowrap; box-shadow:0 10px 30px -8px rgba(36,27,21,0.5); animation:nuToast 1.9s ease forwards;">{{ toast }}</div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 440, &quot;height&quot;: 880 },
+  &quot;accent&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Clay&quot;, &quot;Rose&quot;, &quot;Sage&quot;, &quot;Espresso&quot;], &quot;default&quot;: &quot;Clay&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;surface&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Cream&quot;, &quot;Porcelain&quot;, &quot;Blush&quot;], &quot;default&quot;: &quot;Cream&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;roundness&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Soft&quot;, &quot;Minimal&quot;, &quot;Sharp&quot;], &quot;default&quot;: &quot;Soft&quot;, &quot;tsType&quot;: &quot;string&quot; }
+}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'shop', category: 'All', query: '', cart: [], detailId: null, detailQty: 1, toast: '',
+      lang: 'en', currency: 'USD', wishlist: [], orders: [], skin: null, subpage: null, skinStep: 0, skinDraft: { type: '', concerns: [], time: '' }, faqOpen: -1 };
+
+    this.CURRENCIES = [
+      { code: 'USD', label: 'US Dollar', symbol: '$', rate: 1, dp: 2, round: 0, pos: 'before' },
+      { code: 'KRW', label: 'Korean Won', symbol: '₩', rate: 1350, dp: 0, round: 100, pos: 'before' },
+      { code: 'EUR', label: 'Euro', symbol: '€', rate: 0.92, dp: 2, round: 0, pos: 'before' },
+      { code: 'UZS', label: 'Uzbek Soʻm', symbol: 'soʻm', rate: 12600, dp: 0, round: 1000, pos: 'after' },
+    ];
+    this.apiBase = '/';
+    this.backendAvailable = false;
+    this.telegramId = this.getUrlTelegramId();
+    this.PRODUCTS = [
+      { id: 'radiance-serum', title: 'Niacinamide Serum', price: 38, category: 'Skincare', detail: 'Niacinamide 15% · 50ml', image: 'shots/serum-3126.jpg', model: 'model/serum-model-1.jpg', gallery: ['shots/serum-3126.jpg', 'model/serum-model-2.jpg', 'videos/C1071.mp4', 'videos/C1072.mp4', 'model/serum-model-1.jpg', 'products/serum-life-1.jpg', 'products/serum-life-2.jpg'], featured: 'Bestseller', tags: ['Brightening', 'Pore care', 'Dark spots'], actives: ['Niacinamide 15%', 'Panthenol 1%', 'Hyaluronic Acid 7X', 'Zinc PCA', 'Tranexamic Acid', 'AHA·BHA·PHA·LHA'], description: 'A waterfull brightening serum that cares for sebum and visible pores while gradually evening tone and fading dark spots. Lightweight, fast-absorbing, and layered with 15% niacinamide.' },
+      { id: 'tone-up-cream', title: 'Niacinamide Tone Up Cream', price: 32, category: 'Skincare', detail: 'Niacinamide 5% · 50ml', image: 'shots/5152.jpg', model: 'model/cream-model-1.jpg', gallery: ['shots/5152.jpg', 'model/cream-model-3.jpg', 'videos/C1073.mp4', 'videos/C1074.mp4', 'videos/C1075.mp4', 'videos/C1076.mp4', 'videos/C1077.mp4', 'model/cream-model-1.jpg', 'products/cream-life-1.jpg', 'products/cream-life-2.jpg', 'shots/4441.jpg', 'shots/7569.jpg', 'shots/2375.jpg', 'shots/7227.jpg', 'shots/0310.jpg'], featured: '', tags: ['Tone-up', 'Glow', 'Daily'], actives: ['Niacinamide 5%', 'Panthenol 3%', 'Glutathione', 'Arbutin', 'Bakuchiol', 'Hyaluronic Acid 5X'], description: 'A moist tone-up cream that smooths on weightlessly, brightening dull skin for a soft, natural glow. Bakuchiol and glutathione support an even, healthy-looking finish day after day.' },
+      { id: 'pink-tone-up-cream', title: 'Niacinamide Pink Tone Up Cream', price: 34, category: 'Skincare', detail: 'SPF50+ PA+++ · 50ml', image: 'shots/pink-2.jpg', gallery: ['shots/pink-2.jpg', 'shots/pink-1.jpg', 'products/pink-life-2.jpg'], featured: '', tags: ['SPF50+ PA+++', 'Rosy glow', 'Sun care'], actives: ['SPF50+ PA+++', 'Niacinamide 5%', 'Panthenol', 'Rosy tone-up pearl'], description: 'A rosy-flush tone-up cream with broad-spectrum SPF50+ PA+++. Protects against UV while leaving a warm, healthy radiance — the sun-smart twin of our Tone Up Cream.' },
+      { id: 'barrier-cream', title: 'Ceramide Barrier Cream', price: 36, category: 'Skincare', detail: '6 Ceramides · 50ml', image: 'shots/barrier-1.jpg', gallery: ['shots/barrier-1.jpg', 'products/barrier-life-1.jpg', 'products/barrier-life-2.jpg', 'products/barrier-life-3.jpg'], featured: '', tags: ['Barrier repair', 'Deep moisture', 'Soothing'], actives: ['6 types of Ceramide', 'Panthenol', 'Multi-Ceramide complex', 'Squalane'], description: 'A multi-ceramide cream that floods the skin with moisture and rebuilds a resilient barrier. Six ceramides calm tightness and redness for comfortable, cushioned skin.' },
+      { id: 'glow-mask', title: 'Collagen 72 Glow Mask', price: 16, category: 'Skincare', detail: 'Collagen 72% · 80ml', image: 'products/glow-life-1.jpg', gallery: ['products/glow-life-1.jpg', 'products/glow-life-2.jpg', 'products/glow-life-3.jpg', 'products/glow-life-4.jpg'], featured: '', tags: ['Plumping', 'Collagen 72%', 'Wash-off'], actives: ['Collagen Water 72%', '7 types of Peptide', 'Hydrolyzed Collagen', 'Ceramide'], description: 'A jelly wash-off mask packed with 72% collagen water and seven peptides. Drench skin for an instant bounce and a dewy, plumped glow in minutes.' },
+      { id: 'modeling-pack', title: 'Serum & Cream Modeling Pack', price: 18, category: 'Skincare', detail: 'Rubber Mask · 2-step', image: 'products/modeling-life-3.jpg', gallery: ['products/modeling-life-3.jpg', 'products/modeling-life-2.jpg', 'products/modeling-life-4.jpg', 'products/modeling-life-1.jpg'], featured: '', tags: ['Sealing', 'Rubber mask', '2-step'], actives: ['Serum + Cream 2-step', 'Alginate rubber base', 'Niacinamide', 'Collagen'], description: 'A two-step rubber modeling pack: massage in the serum, seal with the rubber mask, and lock active ingredients deep for a cooling spa-grade finish at home.' },
+      { id: 'finish-powder', title: 'Blurring Finish Powder', price: 28, category: 'Makeup', detail: 'Soft Focus · 8g', image: 'products/powder-life-1.jpg', gallery: ['products/powder-life-1.jpg', 'products/powder-life-3.jpg', 'products/powder-life-4.jpg'], featured: '', tags: ['Soft focus', 'Oil control', 'Talc-free'], actives: ['Soft-focus powder', 'Sebum-absorbing complex', 'Talc-free', 'Weightless finish'], description: 'A breathable, talc-free setting powder that optically blurs pores and fine lines while keeping shine in check from morning to night.' },
+      { id: 'oil-control-paper', title: 'Oil Control Paper', price: 8, category: 'Makeup', detail: 'No-Sebum · 60 sheets', image: 'shots/oil-paper-1045.jpg', gallery: ['shots/oil-paper-1045.jpg', 'shots/oil-2.jpg', 'shots/oil-3.jpg', 'shots/oil-4.jpg', 'shots/oil-5.jpg', 'shots/oil-6.jpg'], featured: '', tags: ['Blotting', '60 sheets', 'On-the-go'], actives: ['Natural pulp film', 'No-sebum control', 'Makeup-safe', 'Pocket size'], description: 'Ultra-thin natural-pulp blotting paper that lifts away excess sebum without disturbing makeup. Sixty sheets to keep you fresh anywhere.' },
+      { id: 'solid-perfume', title: 'Sherbet Solid Perfume', price: 24, category: 'Inner Beauty', detail: 'Solid Eau · 40ml', image: 'products/perfume-life-1.jpg', gallery: ['products/perfume-life-1.jpg', 'products/perfume-life-2.jpg', 'products/perfume-life-3.jpg', 'products/perfume-life-4.jpg'], featured: '', tags: ['001 Lily Cotton', '002 Sweet Floral', 'Solid balm'], actives: ['001 Lily Cotton — fruity floral', '002 Sweet Floral — soft musk', 'White Musk base', 'Skin-warm balm'], description: 'A sherbet-textured solid perfume that melts into warmth on skin. Choose 001 Lily Cotton (berry & muguet) or 002 Sweet Floral (peach & camellia) for a close, comforting trail.' },
+      { id: 'niacinamide-set', title: 'Niacinamide Line Set', price: 64, category: 'Sets', detail: 'Serum + Cream · Duo', image: 'products/set-life-1.jpg', gallery: ['products/set-life-1.jpg', 'model/serum-model-1.jpg', 'products/set-life-3.jpg', 'products/set-life-4.jpg'], featured: 'Best value', tags: ['Duo', 'Serum + Cream', 'Save $6'], actives: ['Niacinamide 15% Serum', 'Niacinamide 5% Tone Up Cream', 'Brightening duo', 'Save $6'], description: 'The essential nuibe ritual: our 15% Niacinamide Serum paired with the 5% Tone Up Cream. Treat, then tone-up — bundled together at a special set price.' },
+    ];
+
+    this.LANGS = [
+      { code: 'en', label: 'English', native: 'English' },
+      { code: 'ru', label: 'Russian', native: 'Русский' },
+      { code: 'ko', label: 'Korean', native: '한국어' },
+      { code: 'uz', label: 'Uzbek', native: 'Oʻzbekcha' },
+    ];
+
+    this.LEGAL = { company: 'nuibe', rep: 'Representative name', addr: 'Seoul, Republic of Korea', mail: '2023-Seoul-0000', biz: '000-00-00000', contact: '+82 (0)2-000-0000', email: 'hello@nuibe.co' };
+
+    this.T = {
+      en: {
+        nav_shop: 'Shop', nav_search: 'Search', nav_bag: 'Bag', nav_profile: 'Profile',
+        hero_loc: 'Seoul · Est. 2023', hero_head: 'Cheerful energy for everyday skin', hero_discover: 'Discover', hero_bestseller: 'Bestseller',
+        camp_label: 'The campaign', camp_quote: 'Real skin, real glow — worn the nuibe way.', camp_follow: 'Follow @nuibe_official',
+        ritual_label: 'The nuibe ritual', ritual_quote: 'Beauty is a daily ritual — skin that breathes, glows, and remembers.',
+        cat_All: 'All', cat_Skincare: 'Skincare', cat_Makeup: 'Makeup', 'cat_Inner Beauty': 'Inner Beauty', cat_Sets: 'Sets',
+        grid_all: 'All products', item: 'item', items: 'items',
+        search_ph: 'Search serum, mask, glow…', search_popular: 'Popular searches', search_best: 'Bestsellers', res_one: 'result', res_many: 'results', search_none: 'Nothing found', search_none_sub: 'Try “serum”, “mask” or “niacinamide”.',
+        cart_title: 'Your bag', cart_subtotal: 'Subtotal', cart_shipping: 'Shipping', cart_free: 'Free', cart_total: 'Total', cart_empty: 'Your bag is empty', cart_empty_sub: 'Find your next ritual.', cart_browse: 'Browse products',
+        mb_checkout: 'Checkout', mb_viewbag: 'View Bag',
+        detail_actives: 'Key actives', detail_add: 'Add to Bag', detail_promise_title: 'Barrier-first, skin-kind', detail_promise_sub: 'Vegan · Cruelty-free · Dermatologically tested.',
+        prof_welcome: 'Welcome, Guest', prof_signin_sub: 'Sign in to sync your rituals', prof_tg: 'Continue with Telegram',
+        m_orders: 'Orders', m_wishlist: 'Wishlist', m_skin: 'Skin profile', m_help: 'Help & support', m_privacy: 'Privacy & legal', m_language: 'Language', m_currency: 'Currency', currency_sub: 'Choose your currency', m_instagram: 'Instagram', set_up: 'Set up', prof_footer: 'Seoul · Skincare · Makeup · Inner Beauty',
+        back: 'Back',
+        orders_title: 'Your orders', orders_empty: 'No orders yet', orders_empty_sub: 'Your past orders will appear here.', orders_shop: 'Start shopping', order_num: 'Order', order_status: 'Processing', order_total: 'Total',
+        wish_title: 'Wishlist', wish_empty: 'Your wishlist is empty', wish_empty_sub: 'Tap the heart on any product to save it here.', wish_browse: 'Browse products', wish_move: 'Add to bag',
+        skin_title: 'Skin profile', skin_intro: 'Answer three quick questions and we’ll tailor a nuibe routine for you.', skin_start: 'Start', skin_step: 'Step', skin_of: 'of', skin_next: 'Next', skin_multi: 'Choose all that apply', skin_done: 'See my routine', skin_result_title: 'Your nuibe routine', skin_result_sub: 'Based on your answers', skin_recos: 'Recommended for you', skin_retake: 'Retake quiz', skin_step_treat: 'Treat', skin_step_hydrate: 'Hydrate', skin_step_protect: 'Protect · SPF', skin_step_weekly: 'Weekly glow', skin_step_mattify: 'Mattify', skin_summary: 'Your skin', skin_routine_label: 'Your routine, step by step', skin_add_all: 'Add routine to bag',
+        skin_q1: 'What’s your skin type?', skin_q2: 'What would you like to improve?', skin_q3: 'How much time for your routine?',
+        t_dry: 'Dry', t_oily: 'Oily', t_combo: 'Combination', t_sensitive: 'Sensitive', t_normal: 'Normal',
+        c_spots: 'Dark spots', c_dull: 'Dullness', c_pores: 'Pores', c_red: 'Redness', c_lines: 'Fine lines', c_hydra: 'Hydration',
+        r_min: 'Minimal · 1–2 steps', r_bal: 'Balanced · 3–4 steps', r_full: 'Full ritual · 5+ steps',
+        help_title: 'Help & support', help_faq: 'Frequently asked', help_contact: 'Contact us', help_contact_sub: 'We usually reply within a day.', help_tg: 'Chat on Telegram', help_ig: 'DM on Instagram', help_email: 'Email us',
+        privacy_title: 'Privacy & legal', privacy_updated: 'Last updated June 2026', legal_title: 'Seller information', legal_company: 'Trade name', legal_rep: 'Representative', legal_addr: 'Business address', legal_mail: 'Mail-order license', legal_biz: 'Business reg. no.', legal_contact: 'Phone', legal_email: 'Email',
+        lang_title: 'Language', lang_sub: 'Choose your language',
+        toast_added: 'Added', toast_order: 'Order placed ✓', toast_wish_add: 'Saved to wishlist', toast_wish_rm: 'Removed from wishlist', toast_skin: 'Skin profile saved ✓', toast_routine: 'Routine added to bag ✓', toast_tg: 'Connect Telegram (demo)',
+      },
+      ru: {
+        nav_shop: 'Магазин', nav_search: 'Поиск', nav_bag: 'Корзина', nav_profile: 'Профиль',
+        hero_loc: 'Сеул · с 2023', hero_head: 'Радостная энергия для кожи каждый день', hero_discover: 'Смотреть', hero_bestseller: 'Хит продаж',
+        camp_label: 'Кампания', camp_quote: 'Настоящая кожа, настоящее сияние — в стиле nuibe.', camp_follow: 'Подписаться @nuibe_official',
+        ritual_label: 'Ритуал nuibe', ritual_quote: 'Красота — это ежедневный ритуал: кожа дышит, сияет и помнит заботу.',
+        cat_All: 'Все', cat_Skincare: 'Уход', cat_Makeup: 'Макияж', 'cat_Inner Beauty': 'Внутренняя красота', cat_Sets: 'Наборы',
+        grid_all: 'Все товары', item: 'товар', items: 'товаров',
+        search_ph: 'Сыворотка, маска, сияние…', search_popular: 'Популярные запросы', search_best: 'Хиты продаж', res_one: 'результат', res_many: 'результатов', search_none: 'Ничего не найдено', search_none_sub: 'Попробуйте «сыворотка», «маска» или «ниацинамид».',
+        cart_title: 'Ваша корзина', cart_subtotal: 'Подытог', cart_shipping: 'Доставка', cart_free: 'Бесплатно', cart_total: 'Итого', cart_empty: 'Корзина пуста', cart_empty_sub: 'Найдите свой следующий ритуал.', cart_browse: 'К товарам',
+        mb_checkout: 'Оформить', mb_viewbag: 'В корзину',
+        detail_actives: 'Активные компоненты', detail_add: 'В корзину', detail_promise_title: 'Сначала барьер, бережно к коже', detail_promise_sub: 'Веган · Без тестов на животных · Дерматологически протестировано.',
+        prof_welcome: 'Здравствуйте, гость', prof_signin_sub: 'Войдите, чтобы сохранить ритуалы', prof_tg: 'Войти через Telegram',
+        m_orders: 'Заказы', m_wishlist: 'Избранное', m_skin: 'Профиль кожи', m_help: 'Помощь и поддержка', m_privacy: 'Конфиденциальность', m_language: 'Язык', m_currency: 'Валюта', currency_sub: 'Выберите валюту', m_instagram: 'Instagram', set_up: 'Настроить', prof_footer: 'Сеул · Уход · Макияж · Красота',
+        back: 'Назад',
+        orders_title: 'Ваши заказы', orders_empty: 'Заказов пока нет', orders_empty_sub: 'Здесь появятся ваши заказы.', orders_shop: 'За покупками', order_num: 'Заказ', order_status: 'В обработке', order_total: 'Итого',
+        wish_title: 'Избранное', wish_empty: 'В избранном пусто', wish_empty_sub: 'Нажмите сердечко на товаре, чтобы сохранить его.', wish_browse: 'К товарам', wish_move: 'В корзину',
+        skin_title: 'Профиль кожи', skin_intro: 'Ответьте на три коротких вопроса — и мы подберём ритуал nuibe.', skin_start: 'Начать', skin_step: 'Шаг', skin_of: 'из', skin_next: 'Далее', skin_multi: 'Выберите подходящее', skin_done: 'Показать ритуал', skin_result_title: 'Ваш ритуал nuibe', skin_result_sub: 'На основе ваших ответов', skin_recos: 'Рекомендуем вам', skin_retake: 'Пройти заново', skin_step_treat: 'Уход', skin_step_hydrate: 'Увлажнение', skin_step_protect: 'Защита · SPF', skin_step_weekly: 'Раз в неделю', skin_step_mattify: 'Матирование', skin_summary: 'Ваша кожа', skin_routine_label: 'Ваш уход, шаг за шагом', skin_add_all: 'Добавить уход в корзину',
+        skin_q1: 'Какой у вас тип кожи?', skin_q2: 'Что хотите улучшить?', skin_q3: 'Сколько времени на уход?',
+        t_dry: 'Сухая', t_oily: 'Жирная', t_combo: 'Комбинированная', t_sensitive: 'Чувствительная', t_normal: 'Нормальная',
+        c_spots: 'Пигментация', c_dull: 'Тусклость', c_pores: 'Поры', c_red: 'Покраснение', c_lines: 'Морщинки', c_hydra: 'Увлажнение',
+        r_min: 'Минимум · 1–2 шага', r_bal: 'Баланс · 3–4 шага', r_full: 'Полный ритуал · 5+ шагов',
+        help_title: 'Помощь и поддержка', help_faq: 'Частые вопросы', help_contact: 'Связаться с нами', help_contact_sub: 'Обычно отвечаем в течение дня.', help_tg: 'Чат в Telegram', help_ig: 'Написать в Instagram', help_email: 'Эл. почта',
+        privacy_title: 'Конфиденциальность', privacy_updated: 'Обновлено в июне 2026', legal_title: 'Информация о продавце', legal_company: 'Название', legal_rep: 'Представитель', legal_addr: 'Адрес', legal_mail: 'Лицензия дистанц. торговли', legal_biz: 'Рег. номер', legal_contact: 'Телефон', legal_email: 'Эл. почта',
+        lang_title: 'Язык', lang_sub: 'Выберите язык',
+        toast_added: 'Добавлено', toast_order: 'Заказ оформлен ✓', toast_wish_add: 'В избранном', toast_wish_rm: 'Удалено из избранного', toast_skin: 'Профиль кожи сохранён ✓', toast_routine: 'Уход добавлен в корзину ✓', toast_tg: 'Подключить Telegram (демо)',
+      },
+      ko: {
+        nav_shop: '쇼핑', nav_search: '검색', nav_bag: '장바구니', nav_profile: '프로필',
+        hero_loc: '서울 · 2023', hero_head: '매일의 피부에 경쾌한 에너지', hero_discover: '둘러보기', hero_bestseller: '베스트셀러',
+        camp_label: '캠페인', camp_quote: '진짜 피부, 진짜 광채 — nuibe의 방식으로.', camp_follow: '@nuibe_official 팔로우',
+        ritual_label: 'nuibe 리추얼', ritual_quote: '아름다움은 매일의 리추얼 — 숨 쉬고, 빛나고, 기억하는 피부.',
+        cat_All: '전체', cat_Skincare: '스킨케어', cat_Makeup: '메이크업', 'cat_Inner Beauty': '이너뷰티', cat_Sets: '세트',
+        grid_all: '전체 상품', item: '개', items: '개',
+        search_ph: '세럼, 마스크, 광채 검색…', search_popular: '인기 검색어', search_best: '베스트셀러', res_one: '개 결과', res_many: '개 결과', search_none: '검색 결과 없음', search_none_sub: '“세럼”, “마스크”, “나이아신아마이드”로 검색해 보세요.',
+        cart_title: '장바구니', cart_subtotal: '상품 합계', cart_shipping: '배송', cart_free: '무료', cart_total: '총액', cart_empty: '장바구니가 비어 있어요', cart_empty_sub: '다음 리추얼을 찾아보세요.', cart_browse: '상품 보기',
+        mb_checkout: '결제하기', mb_viewbag: '장바구니 보기',
+        detail_actives: '핵심 성분', detail_add: '장바구니 담기', detail_promise_title: '장벽 케어 우선, 피부에 순하게', detail_promise_sub: '비건 · 동물실험 안 함 · 피부과 테스트 완료.',
+        prof_welcome: '환영합니다, 게스트님', prof_signin_sub: '로그인하고 리추얼을 동기화하세요', prof_tg: 'Telegram으로 계속하기',
+        m_orders: '주문 내역', m_wishlist: '위시리스트', m_skin: '피부 프로필', m_help: '고객 지원', m_privacy: '개인정보 · 법적 고지', m_language: '언어', m_currency: '통화', currency_sub: '통화를 선택하세요', m_instagram: 'Instagram', set_up: '설정', prof_footer: '서울 · 스킨케어 · 메이크업 · 이너뷰티',
+        back: '뒤로',
+        orders_title: '주문 내역', orders_empty: '아직 주문이 없어요', orders_empty_sub: '지난 주문이 여기에 표시됩니다.', orders_shop: '쇼핑 시작', order_num: '주문', order_status: '처리 중', order_total: '총액',
+        wish_title: '위시리스트', wish_empty: '위시리스트가 비어 있어요', wish_empty_sub: '상품의 하트를 눌러 저장하세요.', wish_browse: '상품 보기', wish_move: '장바구니 담기',
+        skin_title: '피부 프로필', skin_intro: '세 가지 간단한 질문에 답하면 nuibe 루틴을 추천해 드려요.', skin_start: '시작', skin_step: '단계', skin_of: '/', skin_next: '다음', skin_multi: '해당하는 항목 모두 선택', skin_done: '내 루틴 보기', skin_result_title: '나의 nuibe 루틴', skin_result_sub: '답변을 바탕으로', skin_recos: '추천 상품', skin_retake: '다시 하기', skin_step_treat: '집중 케어', skin_step_hydrate: '보습', skin_step_protect: '자외선 차단 · SPF', skin_step_weekly: '주 1회 광채', skin_step_mattify: '유분 정돈', skin_summary: '나의 피부', skin_routine_label: '단계별 루틴', skin_add_all: '루틴 장바구니 담기',
+        skin_q1: '피부 타입은 무엇인가요?', skin_q2: '무엇을 개선하고 싶나요?', skin_q3: '루틴에 쓸 수 있는 시간은?',
+        t_dry: '건성', t_oily: '지성', t_combo: '복합성', t_sensitive: '민감성', t_normal: '중성',
+        c_spots: '잡티', c_dull: '칙칙함', c_pores: '모공', c_red: '붉은기', c_lines: '잔주름', c_hydra: '수분',
+        r_min: '미니멀 · 1–2단계', r_bal: '밸런스 · 3–4단계', r_full: '풀 리추얼 · 5단계 이상',
+        help_title: '고객 지원', help_faq: '자주 묻는 질문', help_contact: '문의하기', help_contact_sub: '보통 하루 안에 답변드려요.', help_tg: 'Telegram 채팅', help_ig: 'Instagram DM', help_email: '이메일 문의',
+        privacy_title: '개인정보 · 법적 고지', privacy_updated: '2026년 6월 업데이트', legal_title: '판매자 정보', legal_company: '상호', legal_rep: '대표자', legal_addr: '사업장 주소', legal_mail: '통신판매업 신고번호', legal_biz: '사업자등록번호', legal_contact: '전화', legal_email: '이메일',
+        lang_title: '언어', lang_sub: '언어를 선택하세요',
+        toast_added: '담김', toast_order: '주문 완료 ✓', toast_wish_add: '위시리스트에 저장됨', toast_wish_rm: '위시리스트에서 삭제됨', toast_skin: '피부 프로필 저장됨 ✓', toast_routine: '루틴이 장바구니에 담겨요 ✓', toast_tg: 'Telegram 연결 (데모)',
+      },
+      uz: {
+        nav_shop: 'Doʻkon', nav_search: 'Qidiruv', nav_bag: 'Savat', nav_profile: 'Profil',
+        hero_loc: 'Seul · 2023', hero_head: 'Har kungi teri uchun quvonchli energiya', hero_discover: 'Koʻrish', hero_bestseller: 'Eng ommabop',
+        camp_label: 'Kampaniya', camp_quote: 'Haqiqiy teri, haqiqiy nur — nuibe uslubida.', camp_follow: '@nuibe_official ga obuna',
+        ritual_label: 'nuibe rituali', ritual_quote: 'Goʻzallik — bu har kungi ritual: nafas oladigan, porlaydigan va gʻamxoʻrlikni eslaydigan teri.',
+        cat_All: 'Hammasi', cat_Skincare: 'Teri parvarishi', cat_Makeup: 'Pardoz', 'cat_Inner Beauty': 'Ichki goʻzallik', cat_Sets: 'Toʻplamlar',
+        grid_all: 'Barcha mahsulotlar', item: 'mahsulot', items: 'mahsulot',
+        search_ph: 'Zardob, niqob, nur qidiring…', search_popular: 'Ommabop qidiruvlar', search_best: 'Eng ommabop', res_one: 'natija', res_many: 'natija', search_none: 'Hech narsa topilmadi', search_none_sub: '“zardob”, “niqob” yoki “niatsinamid” deb qidiring.',
+        cart_title: 'Savatingiz', cart_subtotal: 'Oraliq jami', cart_shipping: 'Yetkazib berish', cart_free: 'Bepul', cart_total: 'Jami', cart_empty: 'Savat boʻsh', cart_empty_sub: 'Keyingi ritualingizni toping.', cart_browse: 'Mahsulotlar',
+        mb_checkout: 'Rasmiylashtirish', mb_viewbag: 'Savatni koʻrish',
+        detail_actives: 'Asosiy tarkib', detail_add: 'Savatga', detail_promise_title: 'Avval baryer, teriga mehribon', detail_promise_sub: 'Vegan · Hayvonlarda sinalmagan · Dermatologik tekshirilgan.',
+        prof_welcome: 'Xush kelibsiz, mehmon', prof_signin_sub: 'Rituallaringizni saqlash uchun kiring', prof_tg: 'Telegram orqali davom etish',
+        m_orders: 'Buyurtmalar', m_wishlist: 'Sevimlilar', m_skin: 'Teri profili', m_help: 'Yordam', m_privacy: 'Maxfiylik va huquqiy', m_language: 'Til', m_currency: 'Valyuta', currency_sub: 'Valyutani tanlang', m_instagram: 'Instagram', set_up: 'Sozlash', prof_footer: 'Seul · Parvarish · Pardoz · Goʻzallik',
+        back: 'Orqaga',
+        orders_title: 'Buyurtmalaringiz', orders_empty: 'Hozircha buyurtma yoʻq', orders_empty_sub: 'Oʻtgan buyurtmalaringiz shu yerda koʻrinadi.', orders_shop: 'Xaridni boshlash', order_num: 'Buyurtma', order_status: 'Jarayonda', order_total: 'Jami',
+        wish_title: 'Sevimlilar', wish_empty: 'Sevimlilar boʻsh', wish_empty_sub: 'Saqlash uchun mahsulotdagi yurakchani bosing.', wish_browse: 'Mahsulotlar', wish_move: 'Savatga',
+        skin_title: 'Teri profili', skin_intro: 'Uchta qisqa savolga javob bering — sizga nuibe ritualini tanlaymiz.', skin_start: 'Boshlash', skin_step: 'Qadam', skin_of: '/', skin_next: 'Keyingi', skin_multi: 'Moslarini tanlang', skin_done: 'Ritualimni koʻrish', skin_result_title: 'Sizning nuibe ritualingiz', skin_result_sub: 'Javoblaringiz asosida', skin_recos: 'Siz uchun tavsiya', skin_retake: 'Qayta oʻtish', skin_step_treat: 'Davolash', skin_step_hydrate: 'Namlash', skin_step_protect: 'Himoya · SPF', skin_step_weekly: 'Haftalik nur', skin_step_mattify: 'Mattlash', skin_summary: 'Sizning teringiz', skin_routine_label: 'Bosqichma-bosqich rituali', skin_add_all: 'Ritualni savatga qoʻshish',
+        skin_q1: 'Teringiz turi qanday?', skin_q2: 'Nimani yaxshilashni xohlaysiz?', skin_q3: 'Ritualga qancha vaqt bor?',
+        t_dry: 'Quruq', t_oily: 'Yogʻli', t_combo: 'Aralash', t_sensitive: 'Sezgir', t_normal: 'Normal',
+        c_spots: 'Dogʻlar', c_dull: 'Xiralik', c_pores: 'Teshikchalar', c_red: 'Qizarish', c_lines: 'Mayda ajinlar', c_hydra: 'Namlik',
+        r_min: 'Minimal · 1–2 qadam', r_bal: 'Muvozanat · 3–4 qadam', r_full: 'Toʻliq ritual · 5+ qadam',
+        help_title: 'Yordam', help_faq: 'Koʻp beriladigan savollar', help_contact: 'Biz bilan bogʻlanish', help_contact_sub: 'Odatda bir kun ichida javob beramiz.', help_tg: 'Telegramda yozish', help_ig: 'Instagramda yozish', help_email: 'Email yuborish',
+        privacy_title: 'Maxfiylik va huquqiy', privacy_updated: '2026-yil iyun holatiga', legal_title: 'Sotuvchi maʼlumotlari', legal_company: 'Nomi', legal_rep: 'Vakil', legal_addr: 'Manzil', legal_mail: 'Masofaviy savdo litsenziyasi', legal_biz: 'Roʻyxat raqami', legal_contact: 'Telefon', legal_email: 'Email',
+        lang_title: 'Til', lang_sub: 'Tilni tanlang',
+        toast_added: 'Qoʻshildi', toast_order: 'Buyurtma qabul qilindi ✓', toast_wish_add: 'Sevimlilarga saqlandi', toast_wish_rm: 'Sevimlilardan olib tashlandi', toast_skin: 'Teri profili saqlandi ✓', toast_routine: 'Ritual savatga qoʻshildi ✓', toast_tg: 'Telegram ulanishi (demo)',
+      },
+    };
+
+    this.FAQ = {
+      en: [
+        { q: 'How long does shipping take?', a: 'Orders within Korea arrive in 2–3 business days. International shipping to Uzbekistan and CIS countries takes 7–14 business days, with tracking sent to your Telegram.' },
+        { q: 'What is your return policy?', a: 'Unopened items can be returned within 7 days of delivery, in line with Korea’s e-commerce cooling-off period. Contact us and we’ll arrange a refund or exchange.' },
+        { q: 'Are nuibe products vegan and cruelty-free?', a: 'Yes. Every nuibe formula is vegan, never tested on animals, and dermatologically tested for sensitive skin.' },
+        { q: 'How do I choose between the Serum and the Tone Up Cream?', a: 'Use the 15% Niacinamide Serum to target dark spots and pores, then seal with the 5% Tone Up Cream for daily glow. The Niacinamide Line Set bundles both.' },
+        { q: 'Which payment methods do you accept?', a: 'We accept major cards, Apple Pay, Google Pay, and local payment options through the Telegram checkout.' },
+        { q: 'How do you protect my personal data?', a: 'We follow Korea’s Personal Information Protection Act (PIPA) and Uzbekistan’s Law on Personal Data. We collect only what’s needed to fulfil your order and never sell your data. See Privacy & legal for details.' },
+      ],
+      ru: [
+        { q: 'Сколько идёт доставка?', a: 'По Корее — 2–3 рабочих дня. Международная доставка в Узбекистан и страны СНГ занимает 7–14 рабочих дней, трек-номер придёт в Telegram.' },
+        { q: 'Какие условия возврата?', a: 'Нераспечатанные товары можно вернуть в течение 7 дней после доставки — в соответствии с «периодом охлаждения» в e-commerce Кореи. Напишите нам, и мы оформим возврат или обмен.' },
+        { q: 'Продукты nuibe веганские и без тестов на животных?', a: 'Да. Каждая формула nuibe веганская, не тестируется на животных и дерматологически протестирована для чувствительной кожи.' },
+        { q: 'Как выбрать между сывороткой и кремом Tone Up?', a: 'Используйте сыворотку с 15% ниацинамида против пигментации и пор, затем крем Tone Up с 5% для ежедневного сияния. В наборе Niacinamide Line есть оба средства.' },
+        { q: 'Какие способы оплаты вы принимаете?', a: 'Принимаем основные карты, Apple Pay, Google Pay и локальные способы оплаты через оформление в Telegram.' },
+        { q: 'Как вы защищаете мои данные?', a: 'Мы соблюдаем закон Кореи о защите персональных данных (PIPA) и закон Узбекистана «О персональных данных». Собираем только необходимое для выполнения заказа и не продаём ваши данные. Подробнее — в разделе «Конфиденциальность».' },
+      ],
+      ko: [
+        { q: '배송은 얼마나 걸리나요?', a: '한국 내 주문은 영업일 기준 2–3일 소요됩니다. 우즈베키스탄 및 CIS 국가로의 국제 배송은 7–14영업일이 걸리며, 운송장 번호는 Telegram으로 전송됩니다.' },
+        { q: '반품 정책은 어떻게 되나요?', a: '미개봉 상품은 수령 후 7일 이내 반품 가능합니다(한국 전자상거래 청약철회 기간 기준). 문의해 주시면 환불 또는 교환을 도와드립니다.' },
+        { q: 'nuibe 제품은 비건이고 동물실험을 하지 않나요?', a: '네. 모든 nuibe 포뮬러는 비건이며 동물실험을 하지 않고, 민감성 피부를 위한 피부과 테스트를 완료했습니다.' },
+        { q: '세럼과 톤업크림 중 무엇을 선택할까요?', a: '나이아신아마이드 15% 세럼으로 잡티와 모공을 케어하고, 5% 톤업크림으로 마무리해 매일의 광채를 더하세요. 나이아신아마이드 라인 세트에 두 제품이 모두 포함됩니다.' },
+        { q: '어떤 결제 수단을 지원하나요?', a: '주요 카드, Apple Pay, Google Pay, 그리고 Telegram 결제를 통한 현지 결제 수단을 지원합니다.' },
+        { q: '개인정보는 어떻게 보호되나요?', a: '한국의 개인정보 보호법(PIPA)과 우즈베키스탄의 개인정보법을 준수합니다. 주문 처리에 필요한 정보만 수집하며 데이터를 판매하지 않습니다. 자세한 내용은 개인정보 · 법적 고지를 확인하세요.' },
+      ],
+      uz: [
+        { q: 'Yetkazib berish qancha vaqt oladi?', a: 'Koreya ichidagi buyurtmalar 2–3 ish kunida yetib boradi. Oʻzbekiston va MDH davlatlariga xalqaro yetkazib berish 7–14 ish kuni, kuzatuv raqami Telegramga yuboriladi.' },
+        { q: 'Qaytarish shartlari qanday?', a: 'Ochilmagan mahsulotlarni yetkazilgandan keyin 7 kun ichida qaytarish mumkin (Koreya elektron savdo “sovish davri”ga muvofiq). Biz bilan bogʻlaning — qaytarish yoki almashtirishni rasmiylashtiramiz.' },
+        { q: 'nuibe mahsulotlari vegan va hayvonlarda sinalmaganmi?', a: 'Ha. Har bir nuibe formulasi vegan, hayvonlarda sinalmaydi va sezgir teri uchun dermatologik tekshirilgan.' },
+        { q: 'Zardob va Tone Up krem orasidan qanday tanlayman?', a: '15% Niatsinamid zardobi bilan dogʻlar va teshikchalarni parvarishlang, soʻng 5% Tone Up krem bilan yakunlab kunlik nur bering. Niacinamide Line toʻplamida ikkalasi ham bor.' },
+        { q: 'Qanday toʻlov usullarini qabul qilasiz?', a: 'Asosiy kartalar, Apple Pay, Google Pay va Telegram orqali mahalliy toʻlov usullarini qabul qilamiz.' },
+        { q: 'Shaxsiy maʼlumotlarimni qanday himoya qilasiz?', a: 'Koreyaning Shaxsiy maʼlumotlarni himoya qilish qonuni (PIPA) va Oʻzbekistonning “Shaxsga doir maʼlumotlar toʻgʻrisida”gi qonuniga amal qilamiz. Faqat buyurtmani bajarish uchun zarur maʼlumotni yigʻamiz va maʼlumotlaringizni sotmaymiz. Batafsil — Maxfiylik va huquqiy boʻlimida.' },
+      ],
+    };
+
+    this.PRIVACY = {
+      en: [
+        { h: 'Who we are', b: 'nuibe (“we”) operates this Telegram mini app to sell skincare and beauty products. This notice explains how we handle your personal data under the Republic of Korea’s Personal Information Protection Act (PIPA) and the Republic of Uzbekistan’s Law “On Personal Data” (ZRU-547).' },
+        { h: 'Data we collect', b: 'Name, delivery address, phone number, Telegram ID, order history and — only with your consent — your skin-profile answers. We collect the minimum needed to process and deliver your orders.' },
+        { h: 'How we use it', b: 'To process orders, arrange delivery, provide support and, with your consent, personalise recommendations. We do not use your data for any incompatible purpose without obtaining new consent.' },
+        { h: 'Consent', b: 'By placing an order or saving a skin profile you consent to this processing. You may withdraw consent at any time by contacting us; we will then stop processing and delete your data unless the law requires us to retain it.' },
+        { h: 'Your rights', b: 'You may access, correct, delete or export your personal data and object to its processing. Requests are handled within the timelines set by Korean and Uzbek law.' },
+        { h: 'Storage & transfers', b: 'Personal data of Uzbek users is handled in line with Uzbekistan’s data-localization rules; cross-border transfers occur only where an adequate level of protection or your explicit consent exists. We apply technical and organisational security measures to protect your data.' },
+        { h: 'Contact', b: 'For any privacy request contact privacy@nuibe.co or @nuibe_official on Telegram. You may also contact Korea’s PIPC or Uzbekistan’s State Personalization Agency.' },
+      ],
+      ru: [
+        { h: 'Кто мы', b: 'nuibe («мы») управляет этим мини-приложением Telegram для продажи косметики и средств по уходу. Здесь описано, как мы обрабатываем ваши персональные данные согласно закону Республики Корея о защите персональных данных (PIPA) и закону Республики Узбекистан «О персональных данных» (ZRU-547).' },
+        { h: 'Какие данные мы собираем', b: 'Имя, адрес доставки, номер телефона, Telegram ID, историю заказов и — только с вашего согласия — ответы профиля кожи. Мы собираем минимум, необходимый для обработки и доставки заказов.' },
+        { h: 'Как мы их используем', b: 'Для обработки заказов, организации доставки, поддержки и, с вашего согласия, персональных рекомендаций. Мы не используем данные для несовместимых целей без нового согласия.' },
+        { h: 'Согласие', b: 'Оформляя заказ или сохраняя профиль кожи, вы даёте согласие на обработку. Вы можете отозвать его в любой момент, связавшись с нами; тогда мы прекратим обработку и удалим данные, если закон не требует их хранения.' },
+        { h: 'Ваши права', b: 'Вы можете получить доступ к данным, исправить, удалить или экспортировать их, а также возразить против обработки. Запросы обрабатываются в сроки, установленные законами Кореи и Узбекистана.' },
+        { h: 'Хранение и передача', b: 'Данные пользователей из Узбекистана обрабатываются с учётом требований локализации; трансграничная передача — только при достаточном уровне защиты или вашем явном согласии. Мы применяем технические и организационные меры защиты.' },
+        { h: 'Контакты', b: 'По вопросам конфиденциальности пишите на privacy@nuibe.co или @nuibe_official в Telegram. Также можно обратиться в PIPC Кореи или Агентство персонализации Узбекистана.' },
+      ],
+      ko: [
+        { h: '회사 소개', b: 'nuibe(“회사”)는 이 Telegram 미니앱을 통해 스킨케어 및 뷰티 제품을 판매합니다. 본 고지는 대한민국 개인정보 보호법(PIPA)과 우즈베키스탄 “개인정보법”(ZRU-547)에 따라 개인정보를 처리하는 방법을 설명합니다.' },
+        { h: '수집하는 정보', b: '이름, 배송 주소, 전화번호, Telegram ID, 주문 내역, 그리고 동의가 있는 경우에 한해 피부 프로필 답변을 수집합니다. 주문 처리와 배송에 필요한 최소한의 정보만 수집합니다.' },
+        { h: '이용 목적', b: '주문 처리, 배송, 고객 지원, 그리고 동의 시 맞춤 추천을 위해 사용합니다. 새로운 동의 없이 양립 불가능한 목적으로 정보를 사용하지 않습니다.' },
+        { h: '동의', b: '주문하거나 피부 프로필을 저장하면 이 처리에 동의하는 것입니다. 언제든지 문의를 통해 동의를 철회할 수 있으며, 법령상 보관 의무가 없는 한 처리를 중단하고 정보를 삭제합니다.' },
+        { h: '이용자의 권리', b: '개인정보의 열람, 정정, 삭제, 이전을 요청하고 처리에 반대할 수 있습니다. 요청은 한국과 우즈베키스탄 법이 정한 기한 내에 처리됩니다.' },
+        { h: '보관 및 이전', b: '우즈베키스탄 이용자의 개인정보는 현지 데이터 보관 규정에 따라 처리되며, 국외 이전은 충분한 보호 수준이 보장되거나 명시적 동의가 있는 경우에만 이루어집니다. 정보 보호를 위해 기술적·관리적 보안 조치를 적용합니다.' },
+        { h: '문의', b: '개인정보 관련 요청은 privacy@nuibe.co 또는 Telegram @nuibe_official로 연락해 주세요. 한국 개인정보보호위원회(PIPC) 또는 우즈베키스탄 국가개인화기관에도 문의할 수 있습니다.' },
+      ],
+      uz: [
+        { h: 'Biz haqimizda', b: 'nuibe (“biz”) ushbu Telegram mini-ilovasi orqali teri parvarishi va goʻzallik mahsulotlarini sotadi. Ushbu bildirishnoma Koreya Respublikasining Shaxsiy maʼlumotlarni himoya qilish qonuni (PIPA) va Oʻzbekiston Respublikasining “Shaxsga doir maʼlumotlar toʻgʻrisida”gi qonuni (ZRU-547) asosida maʼlumotlaringizni qanday boshqarishimizni tushuntiradi.' },
+        { h: 'Toʻplaydigan maʼlumotlar', b: 'Ism, yetkazib berish manzili, telefon raqami, Telegram ID, buyurtmalar tarixi va — faqat roziligingiz bilan — teri profili javoblari. Buyurtmani bajarish va yetkazish uchun zarur boʻlgan eng kam maʼlumotni yigʻamiz.' },
+        { h: 'Foydalanish maqsadi', b: 'Buyurtmalarni bajarish, yetkazib berish, qoʻllab-quvvatlash va roziligingiz bilan tavsiyalarni shaxsiylashtirish uchun. Yangi rozilik olmasdan maʼlumotni mos kelmaydigan maqsadda ishlatmaymiz.' },
+        { h: 'Rozilik', b: 'Buyurtma berish yoki teri profilini saqlash orqali ushbu ishlovga rozilik bildirasiz. Istalgan vaqtda biz bilan bogʻlanib rozilikni qaytarib olishingiz mumkin; shunda qonun talab qilmasa, ishlovni toʻxtatamiz va maʼlumotni oʻchiramiz.' },
+        { h: 'Huquqlaringiz', b: 'Shaxsiy maʼlumotlaringizdan foydalanish, tuzatish, oʻchirish yoki eksport qilishni soʻrashingiz va ishlovga eʼtiroz bildirishingiz mumkin. Soʻrovlar Koreya va Oʻzbekiston qonunlari belgilagan muddatlarda koʻrib chiqiladi.' },
+        { h: 'Saqlash va uzatish', b: 'Oʻzbekiston foydalanuvchilarining maʼlumotlari mahalliy lokalizatsiya qoidalariga muvofiq boshqariladi; chegaradan tashqari uzatish faqat yetarli himoya darajasi yoki aniq roziligingiz boʻlganda amalga oshiriladi. Maʼlumotni himoya qilish uchun texnik va tashkiliy choralar qoʻllaymiz.' },
+        { h: 'Aloqa', b: 'Maxfiylik boʻyicha soʻrovlar uchun privacy@nuibe.co yoki Telegramda @nuibe_official ga yozing. Shuningdek Koreya PIPC yoki Oʻzbekiston Davlat personalizatsiya agentligiga murojaat qilishingiz mumkin.' },
+      ],
+    };
+  }
+
+  componentDidMount() {
+    try {
+      const lang = localStorage.getItem('nuibe_lang'); if (lang) this.setState({ lang });
+      const cur = localStorage.getItem('nuibe_currency'); if (cur) this.setState({ currency: cur });
+      const wl = localStorage.getItem('nuibe_wishlist'); if (wl) this.setState({ wishlist: JSON.parse(wl) });
+      const od = localStorage.getItem('nuibe_orders'); if (od) this.setState({ orders: JSON.parse(od) });
+      const sk = localStorage.getItem('nuibe_skin'); if (sk) this.setState({ skin: JSON.parse(sk) });
+    } catch (e) {}
+    this.fetchRemoteProducts();
+    this.fetchRemoteFaqs();
+  }
+
+  componentWillUnmount() { clearTimeout(this._t); if (this._scrollTimer) clearInterval(this._scrollTimer); }
+
+  tr(key) { const L = this.T[this.state.lang] || this.T.en; return (key in L) ? L[key] : (this.T.en[key] != null ? this.T.en[key] : key); }
+  persist(key, val) { try { localStorage.setItem('nuibe_' + key, typeof val === 'string' ? val : JSON.stringify(val)); } catch (e) {} }
+
+  setLang(code) { this.setState({ lang: code }); this.persist('lang', code); }
+  setCurrency(code) { this.setState({ currency: code }); this.persist('currency', code); }
+  money(usd) {
+    const c = this.CURRENCIES.find((x) => x.code === this.state.currency) || this.CURRENCIES[0];
+    let v = usd * c.rate;
+    if (c.round) v = Math.round(v / c.round) * c.round;
+    const num = v.toLocaleString('en-US', { minimumFractionDigits: c.dp, maximumFractionDigits: c.dp });
+    return c.pos === 'after' ? (num + ' ' + c.symbol) : (c.symbol + num);
+  }
+  openSub(name) { this.setState({ subpage: name, faqOpen: -1 }); }
+  closeSub() { this.setState({ subpage: null }); }
+
+  isWished(id) { return this.state.wishlist.indexOf(id) !== -1; }
+  toggleWish(id) {
+    this.setState((s) => {
+      const has = s.wishlist.indexOf(id) !== -1;
+      const wishlist = has ? s.wishlist.filter((x) => x !== id) : [...s.wishlist, id];
+      this.persist('wishlist', wishlist);
+      return { wishlist };
+    });
+    this.showToast(this.isWished(id) ? this.tr('toast_wish_rm') : this.tr('toast_wish_add'));
+  }
+
+  toggleFaq(i) { this.setState((s) => ({ faqOpen: s.faqOpen === i ? -1 : i })); }
+
+  // skin quiz
+  setSkinType(t) { this.setState((s) => ({ skinDraft: { ...s.skinDraft, type: t } })); }
+  toggleConcern(c) { this.setState((s) => { const cs = s.skinDraft.concerns; const has = cs.indexOf(c) !== -1; return { skinDraft: { ...s.skinDraft, concerns: has ? cs.filter((x) => x !== c) : [...cs, c] } }; }); }
+  setSkinTime(t) { this.setState((s) => ({ skinDraft: { ...s.skinDraft, time: t } })); }
+  skinNext() { this.setState((s) => ({ skinStep: Math.min(3, s.skinStep + 1) })); }
+  skinBack() { this.setState((s) => ({ skinStep: Math.max(0, s.skinStep - 1) })); }
+  saveSkin() {
+    const skin = { ...this.state.skinDraft, done: true, at: Date.now() };
+    this.setState({ skin });
+    this.persist('skin', skin);
+    this.showToast(this.tr('toast_skin'));
+  }
+  retakeSkin() { this.setState({ skin: null, skinStep: 0, skinDraft: { type: '', concerns: [], time: '' } }); }
+
+  buildRoutine() {
+    const sk = this.state.skin || this.state.skinDraft;
+    const type = sk.type, c = sk.concerns || [], time = sk.time || 'bal';
+    const has = (x) => c.indexOf(x) !== -1;
+    const steps = [];
+    const push = (key, id) => { if (id && !steps.some((s) => s.id === id)) steps.push({ key, id }); };
+
+    // 1 — Treat (active serum) when brightening / texture goals
+    if (has('spots') || has('dull') || has('pores') || type === 'oily' || type === 'combo' || type === 'normal') push('treat', 'radiance-serum');
+    // 2 — Hydrate / moisturise (barrier for dry/sensitive/reactive, tone-up otherwise)
+    if (type === 'dry' || type === 'sensitive' || has('red') || has('hydra')) push('hydrate', 'barrier-cream');
+    else push('hydrate', 'tone-up-cream');
+    // ensure a treat step exists for the smallest routines
+    if (!steps.some((s) => s.key === 'treat')) push('treat', 'radiance-serum');
+    // 3 — Protect (daily SPF tone-up)
+    push('protect', 'pink-tone-up-cream');
+    // 4 — Weekly treatment
+    if (has('lines') || has('dull') || has('hydra')) push('weekly', 'glow-mask');
+    else if (type === 'dry' || type === 'sensitive') push('weekly', 'modeling-pack');
+    else push('weekly', 'glow-mask');
+    // 5 — Mattify extras for oily / pores
+    if (type === 'oily' || has('pores')) { push('mattify', 'finish-powder'); push('mattify', 'oil-control-paper'); }
+
+    // order by canonical step sequence, then trim by time budget
+    const order = ['treat', 'hydrate', 'protect', 'weekly', 'mattify'];
+    steps.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+    const budget = time === 'min' ? 2 : (time === 'full' ? 6 : 4);
+    return steps.slice(0, budget);
+  }
+
+  addRoutineToBag() {
+    const r = this.buildRoutine();
+    this.setState((s) => {
+      let cart = [...s.cart];
+      r.forEach(({ id }) => {
+        const f = cart.find((c) => c.id === id);
+        cart = f ? cart.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c)) : [...cart, { id, qty: 1 }];
+      });
+      return { cart };
+    });
+    this.showToast(this.tr('toast_routine'));
+  }
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 1850);
+  }
+
+  getUrlTelegramId() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('telegram_id') || params.get('telegramId') || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  api(path, options = {}) {
+    const url = path.startsWith('http') ? path : this.apiBase.replace(/\/$/, '') + path;
+    const headers = { 'Content-Type': 'application/json' };
+    if (this.telegramId) headers['X-Telegram-Id'] = this.telegramId;
+    const init = { method: 'GET', headers, ...options };
+    if (options.body && typeof options.body !== 'string') init.body = JSON.stringify(options.body);
+    return fetch(url, init).then((res) => {
+      if (!res.ok) throw new Error(res.statusText || 'API error');
+      return res.json();
+    });
+  }
+
+  async fetchRemoteProducts() {
+    try {
+      const products = await this.api('/api/products');
+      if (Array.isArray(products) && products.length) {
+        this.PRODUCTS = products.map((item) => ({
+          ...item,
+          gallery: item.gallery || [],
+          tags: item.tags || [],
+          actives: item.actives || [],
+        }));
+        this.backendAvailable = true;
+        this.setState({});
+      }
+    } catch (e) {
+      this.backendAvailable = false;
+    }
+  }
+
+  async fetchRemoteFaqs() {
+    try {
+      const lang = this.state.lang || 'en';
+      const faqs = await this.api(`/api/faqs?lang=${encodeURIComponent(lang)}`);
+      if (Array.isArray(faqs) && faqs.length) {
+        this.FAQ[lang] = faqs.map((item) => ({ q: item.question || item.q || '', a: item.answer || item.a || '' }));
+        this.backendAvailable = true;
+      }
+    } catch (e) {
+      // keep local FAQ fallback
+    }
+  }
+
+  setTab(tab) { this.setState({ tab, detailId: null }); }
+
+  addToCart(id, qty) {
+    const n = qty || 1;
+    this.setState((s) => {
+      const found = s.cart.find((c) => c.id === id);
+      const cart = found
+        ? s.cart.map((c) => (c.id === id ? { ...c, qty: c.qty + n } : c))
+        : [...s.cart, { id, qty: n }];
+      return { cart };
+    });
+    const p = this.PRODUCTS.find((x) => x.id === id);
+    this.showToast(this.tr('toast_added') + ' · ' + p.title);
+  }
+
+  changeQty(id, d) {
+    this.setState((s) => ({
+      cart: s.cart.map((c) => (c.id === id ? { ...c, qty: Math.max(1, c.qty + d) } : c)),
+    }));
+  }
+
+  removeItem(id) { this.setState((s) => ({ cart: s.cart.filter((c) => c.id !== id) })); }
+
+  openDetail(id) { this.setState({ detailId: id, detailQty: 1 }); }
+  closeDetail() { this.setState({ detailId: null }); }
+
+  checkout() {
+    const s = this.state;
+    if (!s.cart.length) return;
+    const items = s.cart.map((ci) => { const p = this.PRODUCTS.find((x) => x.id === ci.id); return { id: ci.id, title: p.title, qty: ci.qty, price: p.price, image: p.image }; });
+    const total = items.reduce((a, c) => a + c.price * c.qty, 0);
+    const order = { id: 'NB' + String(Date.now()).slice(-6), at: Date.now(), items, total, count: items.reduce((a, c) => a + c.qty, 0) };
+    const orders = [order, ...s.orders];
+    this.persist('orders', orders);
+    if (this.telegramId) {
+      this.api('/api/orders', { method: 'POST', body: { telegramId: this.telegramId, id: order.id, total, items, status: 'processing' } })
+        .then(() => { this.showToast(this.tr('toast_order')); })
+        .catch(() => { this.showToast(this.tr('toast_order')); });
+    } else {
+      this.showToast(this.tr('toast_order'));
+    }
+    this.setState({ cart: [], orders, subpage: 'orders', tab: 'profile' });
+  }
+
+  thumbEl(src, alt) {
+    return React.createElement('img', { src, alt: alt || '', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } });
+  }
+
+  isVideo(src) { return /\.mp4(\?|$)/i.test(src); }
+
+  galleryMediaEl(src, title) {
+    if (this.isVideo(src)) {
+      return React.createElement('video', {
+        src, loop: true, muted: true, autoPlay: true, playsInline: true, 'webkit-playsinline': 'true', preload: 'auto',
+        ref: (el) => { if (el) { el.muted = true; el.play && el.play().catch(() => {}); } },
+        style: { flex: '0 0 100%', width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', scrollSnapAlign: 'start', display: 'block', background: '#EFE7DB' },
+      });
+    }
+    return React.createElement('img', { src, alt: title, style: { flex: '0 0 100%', width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', scrollSnapAlign: 'start', display: 'block' } });
+  }
+
+  thumbMediaEl(src) {
+    if (this.isVideo(src)) {
+      return React.createElement('span', { style: { position: 'relative', display: 'block', width: '100%', height: '100%' } }, [
+        React.createElement('video', {
+          key: 'v', src, muted: true, playsInline: true, preload: 'auto',
+          ref: (el) => { if (el) { el.muted = true; el.onloadeddata = () => { try { el.currentTime = 0.1; } catch (_) {} }; } },
+          style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+        }),
+        React.createElement('span', { key: 'p', style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' } },
+          React.createElement('span', { style: { width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(36,27,21,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+            React.createElement('span', { style: { width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid #fff', marginLeft: '1px' } }))),
+      ]);
+    }
+    return this.thumbEl(src, '');
+  }
+
+  decorate(p) {
+    const wished = this.isWished(p.id);
+    return { ...p, priceLabel: this.money(p.price), thumb: this.thumbEl(p.image, p.title), open: () => this.openDetail(p.id), add: () => this.addToCart(p.id),
+      wished, wishColor: wished ? '#D2566B' : 'rgba(36,27,21,0.55)', wishFill: wished ? '#D2566B' : 'none', toggleWish: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.toggleWish(p.id); } };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const accentMap = { Clay: '#B5896B', Rose: '#C58B8E', Sage: '#92A07F', Espresso: '#4A3B30' };
+    const bgMap = { Cream: '#F4F0E8', Porcelain: '#F3F1EC', Blush: '#F6EEEA' };
+    const radMap = { Soft: '18px', Minimal: '10px', Sharp: '4px' };
+    const accentVar = accentMap[this.props.accent] || '#B5896B';
+    const bgVar = bgMap[this.props.surface] || '#F4F0E8';
+    const radiusVar = radMap[this.props.roundness] || '18px';
+
+    const cats = ['All', 'Skincare', 'Makeup', 'Inner Beauty', 'Sets'];
+    const categories = cats.map((name) => ({
+      name,
+      label: this.tr('cat_' + name),
+      select: () => this.setState({ category: name }),
+      css: name === s.category
+        ? 'background:var(--ink,#241B15); color:#F4F0E8; border-color:var(--ink,#241B15);'
+        : 'background:var(--card,#fff); color:var(--ink,#241B15);',
+    }));
+
+    const filtered = this.PRODUCTS.filter((p) => s.category === 'All' || p.category === s.category);
+    const products = filtered.map((p) => this.decorate(p));
+
+    // cart
+    const cart = s.cart.map((ci) => {
+      const p = this.PRODUCTS.find((x) => x.id === ci.id);
+      return {
+        ...p, qty: ci.qty, priceLabel: this.money(p.price), lineLabel: this.money(p.price * ci.qty), thumb: this.thumbEl(p.image, p.title),
+        inc: () => this.changeQty(ci.id, 1), dec: () => this.changeQty(ci.id, -1), remove: () => this.removeItem(ci.id),
+      };
+    });
+    const cartCount = cart.reduce((a, c) => a + c.qty, 0);
+    const cartTotal = cart.reduce((a, c) => a + c.price * c.qty, 0);
+    const cartHasItems = cart.length > 0;
+
+    // search
+    const q = s.query.trim().toLowerCase();
+    const hasQuery = q.length > 0;
+    let searchResults = [];
+    if (hasQuery) {
+      searchResults = this.PRODUCTS
+        .filter((p) => (p.title + ' ' + p.detail + ' ' + p.category).toLowerCase().includes(q))
+        .map((p) => this.decorate(p));
+    }
+    const suggestions = ['Niacinamide', 'Serum', 'Mask', 'Glow', 'Set'].map((label) => ({
+      label, go: () => this.setState({ query: label }),
+    }));
+    const popular = ['radiance-serum', 'niacinamide-set', 'glow-mask', 'barrier-cream']
+      .map((id) => this.decorate(this.PRODUCTS.find((p) => p.id === id)));
+
+    // detail
+    const dp = s.detailId ? this.PRODUCTS.find((p) => p.id === s.detailId) : null;
+    const detailOpen = !!dp;
+    const detailQty = s.detailQty;
+    let detail = {}, detailTotalLabel = '';
+    if (dp) {
+      const gallery = (dp.gallery && dp.gallery.length) ? dp.gallery : [dp.image];
+      detail = {
+        ...dp, priceLabel: this.money(dp.price),
+        gallery,
+        galleryEls: gallery.map((src) => ({ el: this.galleryMediaEl(src, dp.title) })),
+        galleryThumbs: gallery.map((src, i) => ({
+          thumb: this.thumbMediaEl(src),
+          select: () => { const c = document.getElementById('detail-gallery'); if (c) c.scrollTo({ left: c.clientWidth * i, behavior: 'smooth' }); },
+        })),
+        inc: () => this.setState((st) => ({ detailQty: st.detailQty + 1 })),
+        dec: () => this.setState((st) => ({ detailQty: Math.max(1, st.detailQty - 1) })),
+        addToBag: () => { this.addToCart(dp.id, s.detailQty); this.closeDetail(); },
+      };
+      detailTotalLabel = this.money(dp.price * detailQty);
+    }
+
+    // main button
+    let mbVisible = false, mbLabel = '', mbSub = '', mbAction = () => {};
+    if (!detailOpen) {
+      if (s.tab === 'cart' && cartHasItems) {
+        mbVisible = true; mbLabel = this.tr('mb_checkout'); mbSub = '· ' + this.money(cartTotal); mbAction = () => this.checkout();
+      } else if ((s.tab === 'shop' || s.tab === 'search') && cartHasItems) {
+        mbVisible = true; mbLabel = this.tr('mb_viewbag'); mbSub = '· ' + cartCount + ' · ' + this.money(cartTotal); mbAction = () => this.setTab('cart');
+      }
+    }
+
+    const tc = (t) => (s.tab === t ? 'var(--ink,#241B15)' : '#B0A595');
+
+    // profile menu icons
+    const ic = (d) => React.createElement('svg', { width: 19, height: 19, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('g', { dangerouslySetInnerHTML: { __html: d } }));
+    const langNative = (this.LANGS.find((l) => l.code === s.lang) || this.LANGS[0]).native;
+    const menu = [
+      { label: this.tr('m_orders'), meta: s.orders.length ? String(s.orders.length) : '', icon: ic('<path d="M6 2 4 6v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4Z"/><path d="M4 6h16"/><path d="M9 10a3 3 0 0 0 6 0"/>'), go: () => this.openSub('orders') },
+      { label: this.tr('m_wishlist'), meta: s.wishlist.length ? String(s.wishlist.length) : '', icon: ic('<path d="M19 14c1.5-1.5 3-3.2 3-5.5A3.5 3.5 0 0 0 12 6 3.5 3.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/>'), go: () => this.openSub('wishlist') },
+      { label: this.tr('m_skin'), meta: s.skin ? '✓' : this.tr('set_up'), icon: ic('<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>'), go: () => this.openSub('skin') },
+      { label: this.tr('m_help'), meta: '', icon: ic('<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4"/><path d="M12 17h.01"/>'), go: () => this.openSub('help') },
+      { label: this.tr('m_privacy'), meta: '', icon: ic('<path d="M12 3 5 6v5c0 4.5 3 8 7 9 4-1 7-4.5 7-9V6Z"/><path d="m9 12 2 2 4-4"/>'), go: () => this.openSub('privacy') },
+      { label: this.tr('m_language'), meta: langNative, icon: ic('<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18"/>'), go: () => this.openSub('language') },
+      { label: this.tr('m_currency'), meta: s.currency, icon: ic('<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2.5 0 0 0-5 0c0 1.4 1 2 2.5 2.5s2.5 1.1 2.5 2.5a2.5 2.5 0 0 1-5 0"/><path d="M12 6.5v11"/>'), go: () => this.openSub('currency') },
+    ];
+
+    // ===== sub-pages =====
+    const t = this.T[s.lang] || this.T.en;
+    const sub = s.subpage;
+    const subTitles = { orders: t.orders_title, wishlist: t.wish_title, skin: t.skin_title, help: t.help_title, privacy: t.privacy_title, language: t.lang_title, currency: t.m_currency };
+    const sampleIn = (c) => {
+      const formattedRate = c.rate.toLocaleString('en-US', { minimumFractionDigits: c.dp, maximumFractionDigits: c.dp });
+      return `1$ = ${c.pos === 'after' ? `${formattedRate} ${c.symbol}` : `${c.symbol}${formattedRate}`}`;
+    };
+    const currencies = this.CURRENCIES.map((c) => ({ code: c.code, label: c.label, symbol: c.symbol, sample: sampleIn(c), active: c.code === s.currency,
+      css: c.code === s.currency ? 'background:var(--ink,#241B15); color:#F4F0E8; border-color:var(--ink,#241B15);' : 'background:var(--card,#fff); color:var(--ink,#241B15);',
+      select: () => this.setCurrency(c.code) }));
+    const fmtDate = (ms) => { try { return new Date(ms).toLocaleDateString(s.lang === 'en' ? 'en-GB' : s.lang, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
+
+    const ordersList = s.orders.map((o) => ({ ...o, dateLabel: fmtDate(o.at), totalLabel: this.money(o.total), countLabel: o.count + ' · ' + t.order_total + ' ' + this.money(o.total),
+      itemEls: o.items.map((it) => ({ ...it, line: it.qty + ' × ' + it.title, thumb: this.thumbEl(it.image, it.title) })) }));
+
+    const wishProducts = s.wishlist.map((id) => this.PRODUCTS.find((p) => p.id === id)).filter(Boolean).map((p) => this.decorate(p));
+
+    const langs = this.LANGS.map((l) => ({ ...l, active: l.code === s.lang, css: l.code === s.lang ? 'background:var(--ink,#241B15); color:#F4F0E8; border-color:var(--ink,#241B15);' : 'background:var(--card,#fff); color:var(--ink,#241B15);', select: () => this.setLang(l.code) }));
+
+    const faqList = (this.FAQ[s.lang] || this.FAQ.en).map((f, i) => ({ q: f.q, a: f.a, open: s.faqOpen === i, toggle: () => this.toggleFaq(i), sign: s.faqOpen === i ? '–' : '+' }));
+    const privacyList = this.PRIVACY[s.lang] || this.PRIVACY.en;
+    const legal = this.LEGAL;
+
+    // skin quiz
+    const sd = s.skinDraft;
+    const skinTypes = [['dry', t.t_dry], ['oily', t.t_oily], ['combo', t.t_combo], ['sensitive', t.t_sensitive], ['normal', t.t_normal]]
+      .map(([k, label]) => ({ k, label, active: sd.type === k, css: sd.type === k ? 'background:var(--ink,#241B15); color:#F4F0E8; border-color:var(--ink,#241B15);' : 'background:var(--card,#fff); color:var(--ink,#241B15);', select: () => this.setSkinType(k) }));
+    const skinConcerns = [['spots', t.c_spots], ['dull', t.c_dull], ['pores', t.c_pores], ['red', t.c_red], ['lines', t.c_lines], ['hydra', t.c_hydra]]
+      .map(([k, label]) => { const on = sd.concerns.indexOf(k) !== -1; return { k, label, active: on, css: on ? 'background:var(--ink,#241B15); color:#F4F0E8; border-color:var(--ink,#241B15);' : 'background:var(--card,#fff); color:var(--ink,#241B15);', select: () => this.toggleConcern(k) }; });
+    const skinTimes = [['min', t.r_min], ['bal', t.r_bal], ['full', t.r_full]]
+      .map(([k, label]) => ({ k, label, active: sd.time === k, css: sd.time === k ? 'background:var(--ink,#241B15); color:#F4F0E8; border-color:var(--ink,#241B15);' : 'background:var(--card,#fff); color:var(--ink,#241B15);', select: () => this.setSkinTime(k) }));
+    const stepLabels = { treat: t.skin_step_treat, hydrate: t.skin_step_hydrate, protect: t.skin_step_protect, weekly: t.skin_step_weekly, mattify: t.skin_step_mattify };
+    const skinRoutine = (s.skin ? this.buildRoutine() : []).map((st, i) => { const d = this.decorate(this.PRODUCTS.find((p) => p.id === st.id)); return { ...d, stepLabel: stepLabels[st.key] || '', stepNum: i + 1 }; });
+    const typeLabelMap = { dry: t.t_dry, oily: t.t_oily, combo: t.t_combo, sensitive: t.t_sensitive, normal: t.t_normal };
+    const concernLabelMap = { spots: t.c_spots, dull: t.c_dull, pores: t.c_pores, red: t.c_red, lines: t.c_lines, hydra: t.c_hydra };
+    const skinSummary = s.skin ? [typeLabelMap[s.skin.type]].concat((s.skin.concerns || []).map((k) => concernLabelMap[k])).filter(Boolean) : [];
+    const skinStepValid = (s.skinStep === 0 && sd.type) || (s.skinStep === 1 && sd.concerns.length) || (s.skinStep === 2 && sd.time);
+
+    return {
+      t,
+      subOpen: !!sub, subpage: sub, subTitle: subTitles[sub] || '',
+      isOrders: sub === 'orders', isWishlist: sub === 'wishlist', isSkin: sub === 'skin', isHelp: sub === 'help', isPrivacy: sub === 'privacy', isLanguage: sub === 'language', isCurrency: sub === 'currency',
+      currencies, heroPrice: this.money(38),
+      closeSub: () => this.closeSub(),
+      ordersList, ordersEmpty: s.orders.length === 0,
+      wishProducts, wishEmpty: s.wishlist.length === 0,
+      langs, faqList, privacyList, legal,
+      skinDone: !!s.skin, skinQuizOpen: !s.skin, skinStep: s.skinStep, skinStepNum: s.skinStep + 1,
+      skinStep0: s.skinStep === 0, skinStep1: s.skinStep === 1, skinStep2: s.skinStep === 2,
+      skinProgress: (((s.skinStep + 1) / 3) * 100) + '%',
+      skinTypes, skinConcerns, skinTimes, skinRoutine, skinSummary, skinStepValid,
+      addRoutineToBag: () => this.addRoutineToBag(),
+      skinCanBack: s.skinStep > 0, skinNotLast: s.skinStep < 2,
+      skinNextDisabled: !skinStepValid, skinNextOpacity: skinStepValid ? '1' : '0.4',
+      skinNext: () => this.skinNext(), skinBack: () => this.skinBack(), saveSkin: () => this.saveSkin(), retakeSkin: () => this.retakeSkin(),
+      skinIsLast: s.skinStep === 2,
+      bgVar, accentVar, radiusVar,
+      isShop: s.tab === 'shop', isSearch: s.tab === 'search', isCart: s.tab === 'cart', isProfile: s.tab === 'profile',
+      goShop: () => this.setTab('shop'), goSearch: () => this.setTab('search'), goCart: () => this.setTab('cart'), goProfile: () => this.setTab('profile'),
+      heroOpen: () => this.openDetail('radiance-serum'),
+      goShopGrid: () => {
+        const doScroll = () => {
+          const g = document.getElementById('grid-section');
+          if (!g) return;
+          const sc = g.closest('main');
+          if (!sc) return;
+          const target = Math.max(0, g.offsetTop - 64);
+          const start = sc.scrollTop;
+          const dist = target - start;
+          if (Math.abs(dist) < 2) return;
+          const dur = 460, t0 = performance.now();
+          const ease = (x) => 1 - Math.pow(1 - x, 3);
+          if (this._scrollTimer) clearInterval(this._scrollTimer);
+          this._scrollTimer = setInterval(() => {
+            const k = Math.min(1, (performance.now() - t0) / dur);
+            sc.scrollTop = start + dist * ease(k);
+            if (k >= 1) { clearInterval(this._scrollTimer); this._scrollTimer = null; }
+          }, 16);
+        };
+        if (s.tab === 'shop' && !s.detailId) {
+          doScroll();
+        } else {
+          this.setTab('shop');
+          setTimeout(doScroll, 90);
+        }
+      },
+      shopColor: tc('shop'), searchColor: tc('search'), cartColor: tc('cart'), profileColor: tc('profile'),
+      categories, products,
+      gridTitle: s.category === 'All' ? t.grid_all : (t['cat_' + s.category] || s.category),
+      productCountLabel: products.length + ' ' + (products.length === 1 ? t.item : t.items),
+      cart, cartCount, cartTotalLabel: this.money(cartTotal), cartHasItems, cartEmpty: !cartHasItems,
+      headerBadge: cartCount > 0,
+      query: s.query, onQuery: (e) => this.setState({ query: e.target.value }), hasQuery, clearQuery: () => this.setState({ query: '' }),
+      showSuggest: !hasQuery, showResults: hasQuery && searchResults.length > 0, showNoResults: hasQuery && searchResults.length === 0,
+      suggestions, popular, searchResults, resultsLabel: searchResults.length + ' ' + (searchResults.length === 1 ? t.res_one : t.res_many),
+      detailOpen, detail, detailQty, detailTotalLabel,
+      closeDetail: () => this.closeDetail(),
+      mbVisible, mbLabel, mbSub, mbAction,
+      menu, signIn: () => this.showToast(this.tr('toast_tg')),
+      toast: s.toast, toastOpen: !!s.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
