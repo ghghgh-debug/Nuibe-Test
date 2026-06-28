@@ -120,6 +120,22 @@ app.put('/api/admin/orders/:id/status', requireAdmin, async (req, res) => {
   res.json(updated);
 });
 
+// Health check endpoint for uptime monitors
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Serve the mini app at root if present, otherwise redirect to admin UI
+app.get('/', (req, res) => {
+  const miniAppPath = path.join(__dirname, 'nuibe Mini App.dc.html');
+  const adminPath = path.join(__dirname, 'admin.html');
+  try {
+    if (require('fs').existsSync(miniAppPath)) return res.sendFile(miniAppPath);
+  } catch (e) {}
+  if (require('fs').existsSync(adminPath)) return res.redirect('/admin.html');
+  res.status(200).send('Nuibe backend is running. Visit /admin.html to manage the app.');
+});
+
 app.listen(port, () => {
   console.log(`Nuibe backend running on http://localhost:${port}`);
 });
