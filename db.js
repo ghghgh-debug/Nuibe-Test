@@ -76,10 +76,18 @@ function ensureSchema() {
     const now = Date.now();
     const transaction = db.transaction((items) => {
       items.forEach((item) => insert.run({
-        ...item,
+        id: item.id,
+        title: item.title || '',
+        price: item.price || 0,
+        category: item.category || '',
+        detail: item.detail || '',
+        image: item.image || '',
+        model: item.model || '',
         gallery: JSON.stringify(item.gallery || []),
+        featured: item.featured || '',
         tags: JSON.stringify(item.tags || []),
         actives: JSON.stringify(item.actives || []),
+        description: item.description || '',
         updated_at: now,
       }));
     });
