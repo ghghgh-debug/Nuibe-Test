@@ -5,7 +5,7 @@ services:
     plan: free
     region: oregon
     buildCommand: npm install
-    startCommand: npm run start-server
+    startCommand: npm start
     autoDeploy: true
 
   - type: worker
