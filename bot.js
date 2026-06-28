@@ -76,6 +76,29 @@ bot.command('help', async (ctx) => {
 
 bot.launch().then(() => {
   console.log('Telegram bot is running');
+  (async () => {
+    try {
+      const me = await bot.telegram.getMe();
+      const botLink = `https://t.me/${me.username}`;
+      const webUrl = process.env.WEB_APP_URL || process.env.ADMIN_URL || 'https://nuibe-test.onrender.com';
+      console.log('Bot URL:', botLink);
+      console.log('Web app URL:', webUrl);
+
+      const adminIds = (process.env.ADMIN_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
+      if (adminIds.length) {
+        const text = `Web app is live: ${webUrl}\nOpen in Telegram: ${botLink}`;
+        for (const id of adminIds) {
+          try {
+            await bot.telegram.sendMessage(id, text);
+          } catch (err) {
+            console.warn('Failed to notify admin', id, err && err.message);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch bot info or notify admins:', err && err.message);
+    }
+  })();
 });
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
