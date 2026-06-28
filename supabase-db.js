@@ -49,6 +49,16 @@ async function getOrdersByTelegramId(telegramId) {
   return data.map((row) => ({ ...row, items: parseItems(row.items) }));
 }
 
+async function getOrderById(id) {
+  if (!supabaseAvailable) return localDb.getOrderById(id);
+  const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+  if (error) {
+    if (error.code === 'PGRST116' || error.status === 404) return null;
+    throw error;
+  }
+  return { ...data, items: parseItems(data.items) };
+}
+
 async function getAllOrders() {
   if (!supabaseAvailable) return localDb.getAllOrders();
   const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
@@ -73,7 +83,8 @@ async function createOrder(order) {
       total: order.total,
       status: order.status || 'processing',
       items: JSON.stringify(order.items || []),
-    }]);
+    }])
+    .select();
   if (error) throw error;
   return { ...data[0], items: order.items };
 }
@@ -81,7 +92,10 @@ async function createOrder(order) {
 async function updateOrderStatus(id, status) {
   if (!supabaseAvailable) return localDb.updateOrderStatus(id, status);
   const { data, error } = await supabase.from('orders').update({ status }).eq('id', id).select('*').single();
-  if (error) throw error;
+  if (error) {
+    if (error.code === 'PGRST116' || error.status === 404) return null;
+    throw error;
+  }
   return { ...data, items: parseItems(data.items) };
 }
 
@@ -116,7 +130,10 @@ async function updateProduct(id, fields) {
     sort_order: fields.sort_order != null ? fields.sort_order : undefined,
   };
   const { data, error } = await supabase.from('products').update(updateFields).eq('id', id).select('*').single();
-  if (error) throw error;
+  if (error) {
+    if (error.code === 'PGRST116' || error.status === 404) return null;
+    throw error;
+  }
   return formatProduct(data);
 }
 
@@ -138,6 +155,7 @@ module.exports = {
   getProductById,
   getFaqs,
   getOrdersByTelegramId,
+  getOrderById,
   getAllOrders,
   createOrder,
   updateOrderStatus,

@@ -72,7 +72,7 @@ app.get('/api/products/:id', asyncHandler(async (req, res) => {
   const product = await db.getProductById(req.params.id);
   if (!product) return res.status(404).json({ error: 'Product not found' });
   res.json(product);
-});
+}));
 
 app.get('/api/faqs', asyncHandler(async (req, res) => {
   const lang = req.query.lang || 'en';
@@ -84,7 +84,7 @@ app.get('/api/user', asyncHandler(async (req, res) => {
   const telegramId = getTelegramId(req);
   const isAdmin = telegramId ? await db.isAdminId(telegramId) : false;
   res.json({ telegramId, isAdmin });
-});
+}));
 
 app.get('/api/orders', asyncHandler(async (req, res) => {
   const telegramId = getTelegramId(req);
@@ -121,7 +121,7 @@ app.post('/api/orders', asyncHandler(async (req, res) => {
   const saved = await db.createOrder(order);
   res.json(saved);
   notifyAdmins(saved).catch((err) => console.warn('Failed to send admin notification:', err && err.message));
-});
+}));
 
 app.get('/api/admin/check', asyncHandler(async (req, res) => {
   const telegramId = getTelegramId(req);
@@ -131,7 +131,7 @@ app.get('/api/admin/check', asyncHandler(async (req, res) => {
 
 app.get('/api/admin/products', requireAdmin, asyncHandler(async (req, res) => {
   res.json(await db.getProducts());
-});
+}));
 
 app.post('/api/admin/products', requireAdmin, asyncHandler(async (req, res) => {
   const product = req.body;
@@ -146,7 +146,7 @@ app.put('/api/admin/products/:id', requireAdmin, asyncHandler(async (req, res) =
   const updated = await db.updateProduct(req.params.id, req.body);
   if (!updated) return res.status(404).json({ error: 'Product not found' });
   res.json(updated);
-});
+}));
 
 app.delete('/api/admin/products/:id', requireAdmin, asyncHandler(async (req, res) => {
   await db.deleteProduct(req.params.id);
