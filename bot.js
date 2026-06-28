@@ -14,18 +14,59 @@ async function isAdmin(userId) {
   return await db.isAdminId(String(userId));
 }
 
-bot.start(async (ctx) => {
-  const greeting = `Welcome to nuibe Bot!\n\nYou can browse product info, review FAQs, and track your order status.`;
-  await ctx.reply(greeting, Markup.keyboard([
-    ['🛍️ Products', '❓ FAQ'],
+function getWebAppUrl() {
+  return process.env.WEB_APP_URL || process.env.ADMIN_URL || 'https://nuibe-test.onrender.com';
+}
+
+function getMainKeyboard() {
+  return Markup.keyboard([
+    ['🛍️ Shop', '❓ FAQ'],
     ['📦 My Orders', '👤 Admin panel']
-  ]).resize());
+  ]).resize();
+}
+
+function getShopButton() {
+  const url = getWebAppUrl();
+  return Markup.inlineKeyboard([[{
+    text: 'Open Shop',
+    web_app: { url },
+  }]]);
+}
+
+bot.start(async (ctx) => {
+  const greeting = `Welcome to Nuibe!\n\nI can help you browse products, answer FAQs, and show your orders.`;
+  await ctx.reply(greeting, getMainKeyboard());
+  await ctx.reply('Open the mini app in Telegram:', getShopButton());
 });
 
-bot.hears('🛍️ Products', async (ctx) => {
+bot.command('shop', async (ctx) => {
+  await ctx.reply('Open the mini app in Telegram:', getShopButton());
+});
+
+bot.command('products', async (ctx) => {
   const products = (await db.getProducts()).slice(0, 5);
+  if (!products.length) return ctx.reply('No products available right now.');
   const items = products.map((product) => `${product.title} — ${product.price}$\n${product.detail}`).join('\n\n');
-  await ctx.reply(`Latest products:\n\n${items}\n\nOpen the mini app to shop or visit the web app.`);
+  await ctx.reply(`Latest products:\n\n${items}`);
+});
+
+bot.command('faq', async (ctx) => {
+  const faqs = (await db.getFaqs('en')).slice(0, 4);
+  if (!faqs.length) return ctx.reply('No FAQ available yet.');
+  const buttons = faqs.map((faq, index) => [Markup.button.callback(faq.question, `faq_${index}`)]);
+  await ctx.reply('Choose a question:', Markup.inlineKeyboard(buttons));
+});
+
+bot.command('orders', async (ctx) => {
+  const userId = String(ctx.from.id);
+  const orders = await db.getOrdersByTelegramId(userId);
+  if (!orders.length) return ctx.reply('You have no orders yet. Open the mini app to shop and place your first order.');
+  const list = orders.map((order) => `#${order.id} — ${order.status}\n${(order.items || []).length} item(s) • ${order.total}$`).join('\n\n');
+  await ctx.reply(`Your recent orders:\n\n${list}`);
+});
+
+bot.hears('🛍️ Shop', async (ctx) => {
+  await ctx.reply('Open the mini app in Telegram:', getShopButton());
 });
 
 bot.hears('❓ FAQ', async (ctx) => {
@@ -56,6 +97,10 @@ bot.hears('👤 Admin panel', async (ctx) => {
   await ctx.reply('Admin commands: /admin_orders, /admin_link');
 });
 
+bot.command('help', async (ctx) => {
+  await ctx.reply('Use the buttons or commands:\n/start — Start the bot\n/shop — Open the mini app\n/products — Browse latest items\n/faq — Frequently asked questions\n/orders — Your order status\n/admin_orders — Admin only\n/admin_link — Admin panel link', getMainKeyboard());
+});
+
 bot.command('admin_orders', async (ctx) => {
   if (!(await isAdmin(ctx.from.id))) return ctx.reply('Admin access required.');
   const orders = await db.getAllOrders();
@@ -68,10 +113,6 @@ bot.command('admin_link', async (ctx) => {
   if (!(await isAdmin(ctx.from.id))) return ctx.reply('Admin access required.');
   const baseUrl = process.env.ADMIN_URL || 'http://localhost:3000/admin.html';
   await ctx.reply(`Open the admin dashboard:\n${baseUrl}?telegram_id=${ctx.from.id}`);
-});
-
-bot.command('help', async (ctx) => {
-  await ctx.reply('Use the buttons or commands:\n/faq — Frequently asked questions\n/products — Browse latest items\n/orders — Your order status\n/admin_orders — Admin only\n/admin_link — Admin panel link');
 });
 
 bot.launch().then(() => {
