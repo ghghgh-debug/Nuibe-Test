@@ -24,6 +24,5 @@ if (SUPABASE_URL && SUPABASE_KEY) {
 	supabase = createClient(SUPABASE_URL, SUPABASE_KEY, options);
 }
 const supabaseAvailable = !!supabase;
-const supabaseAvailable = !!supabase;
 
 module.exports = { supabase, supabaseAvailable };
