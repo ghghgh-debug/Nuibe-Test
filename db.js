@@ -20,6 +20,16 @@ function deserializeArray(raw) {
   }
 }
 
+function addColumnIfMissing(table, columnSql) {
+  try {
+    db.prepare(`ALTER TABLE ${table} ADD COLUMN ${columnSql}`).run();
+  } catch (err) {
+    if (!/duplicate column/i.test(err.message) && !/already exists/i.test(err.message)) {
+      throw err;
+    }
+  }
+}
+
 function ensureSchema() {
   db.exec(`
     PRAGMA journal_mode = WAL;
@@ -41,6 +51,7 @@ function ensureSchema() {
       tags TEXT,
       actives TEXT,
       description TEXT,
+      sort_order INTEGER DEFAULT 0,
       updated_at INTEGER
     );
     CREATE TABLE IF NOT EXISTS faqs (
@@ -53,12 +64,25 @@ function ensureSchema() {
     CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY,
       telegram_id TEXT,
+      telegram_username TEXT,
+      customer_name TEXT,
+      customer_phone TEXT,
+      customer_address TEXT,
+      delivery_time TEXT,
+      notes TEXT,
       created_at INTEGER,
       total REAL,
       status TEXT,
       items TEXT
     );
   `);
+
+  addColumnIfMissing('orders', 'telegram_username TEXT');
+  addColumnIfMissing('orders', 'customer_name TEXT');
+  addColumnIfMissing('orders', 'customer_phone TEXT');
+  addColumnIfMissing('orders', 'customer_address TEXT');
+  addColumnIfMissing('orders', 'delivery_time TEXT');
+  addColumnIfMissing('orders', 'notes TEXT');
 
   const adminCount = db.prepare('SELECT COUNT(*) AS count FROM admins').get().count;
   if (adminCount === 0) {
@@ -108,7 +132,7 @@ function ensureSchema() {
 ensureSchema();
 
 function getProducts() {
-  return db.prepare('SELECT * FROM products ORDER BY title ASC').all().map((row) => ({
+  return db.prepare('SELECT * FROM products ORDER BY sort_order ASC, title ASC').all().map((row) => ({
     ...row,
     gallery: deserializeArray(row.gallery),
     tags: deserializeArray(row.tags),
@@ -145,8 +169,21 @@ function getOrderById(id) {
 }
 
 function createOrder(order) {
-  const stmt = db.prepare('INSERT INTO orders (id, telegram_id, created_at, total, status, items) VALUES (?, ?, ?, ?, ?, ?)');
-  stmt.run(order.id, order.telegram_id, order.created_at, order.total, order.status || 'processing', JSON.stringify(order.items || []));
+  const stmt = db.prepare('INSERT INTO orders (id, telegram_id, telegram_username, customer_name, customer_phone, customer_address, delivery_time, notes, created_at, total, status, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  stmt.run(
+    order.id,
+    order.telegram_id,
+    order.telegram_username || null,
+    order.customer_name || null,
+    order.customer_phone || null,
+    order.customer_address || null,
+    order.delivery_time || null,
+    order.notes || null,
+    order.created_at,
+    order.total,
+    order.status || 'processing',
+    JSON.stringify(order.items || [])
+  );
   return getOrderById(order.id);
 }
 
@@ -157,9 +194,9 @@ function updateOrderStatus(id, status) {
 
 function createProduct(product) {
   const now = Date.now();
-  db.prepare(`INSERT INTO products (id,title,price,category,detail,image,model,gallery,featured,tags,actives,description,updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run(product.id, product.title, product.price, product.category, product.detail, product.image || '', product.model || '', JSON.stringify(product.gallery || []), product.featured || '', JSON.stringify(product.tags || []), JSON.stringify(product.actives || []), product.description || '', now);
+  db.prepare(`INSERT INTO products (id,title,price,category,detail,image,model,gallery,featured,tags,actives,description,sort_order,updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .run(product.id, product.title, product.price, product.category, product.detail, product.image || '', product.model || '', JSON.stringify(product.gallery || []), product.featured || '', JSON.stringify(product.tags || []), JSON.stringify(product.actives || []), product.description || '', product.sort_order || 0, now);
   return getProductById(product.id);
 }
 
@@ -172,10 +209,11 @@ function updateProduct(id, fields) {
     gallery: fields.gallery ? JSON.stringify(fields.gallery) : JSON.stringify(current.gallery),
     tags: fields.tags ? JSON.stringify(fields.tags) : JSON.stringify(current.tags),
     actives: fields.actives ? JSON.stringify(fields.actives) : JSON.stringify(current.actives),
+    sort_order: fields.sort_order != null ? fields.sort_order : current.sort_order,
     updated_at: Date.now(),
   };
-  db.prepare(`UPDATE products SET title = ?, price = ?, category = ?, detail = ?, image = ?, model = ?, gallery = ?, featured = ?, tags = ?, actives = ?, description = ?, updated_at = ? WHERE id = ?`)
-    .run(updated.title, updated.price, updated.category, updated.detail, updated.image, updated.model, updated.gallery, updated.featured, updated.tags, updated.actives, updated.description, updated.updated_at, id);
+  db.prepare(`UPDATE products SET title = ?, price = ?, category = ?, detail = ?, image = ?, model = ?, gallery = ?, featured = ?, tags = ?, actives = ?, description = ?, sort_order = ?, updated_at = ? WHERE id = ?`)
+    .run(updated.title, updated.price, updated.category, updated.detail, updated.image, updated.model, updated.gallery, updated.featured, updated.tags, updated.actives, updated.description, updated.sort_order, updated.updated_at, id);
   return getProductById(id);
 }
 

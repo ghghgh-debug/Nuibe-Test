@@ -16,3 +16,12 @@ services:
     buildCommand: npm install
     startCommand: npm run start-bot
     autoDeploy: true
+
+  - type: worker
+    name: nuibe-admin-bot
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm run start-admin-bot
+    autoDeploy: true

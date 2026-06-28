@@ -20,7 +20,7 @@ function formatProduct(row) {
 
 async function getProducts() {
   if (!supabaseAvailable) return localDb.getProducts();
-  const { data, error } = await supabase.from('products').select('*').order('title', { ascending: true });
+  const { data, error } = await supabase.from('products').select('*').order('sort_order', { ascending: true }).order('title', { ascending: true });
   if (error) throw error;
   return data.map(formatProduct);
 }
@@ -60,7 +60,20 @@ async function createOrder(order) {
   if (!supabaseAvailable) return localDb.createOrder(order);
   const { data, error } = await supabase
     .from('orders')
-    .insert([{ id: order.id, telegram_id: order.telegram_id, created_at: order.created_at, total: order.total, status: order.status || 'processing', items: JSON.stringify(order.items || []) }]);
+    .insert([{ 
+      id: order.id,
+      telegram_id: order.telegram_id,
+      telegram_username: order.telegram_username || null,
+      customer_name: order.customer_name,
+      customer_phone: order.customer_phone,
+      customer_address: order.customer_address,
+      delivery_time: order.delivery_time,
+      notes: order.notes || '',
+      created_at: order.created_at,
+      total: order.total,
+      status: order.status || 'processing',
+      items: JSON.stringify(order.items || []),
+    }]);
   if (error) throw error;
   return { ...data[0], items: order.items };
 }
@@ -87,6 +100,7 @@ async function createProduct(product) {
     tags: product.tags || [],
     actives: product.actives || [],
     description: product.description || '',
+    sort_order: product.sort_order || 0,
   }]).select('*').single();
   if (error) throw error;
   return formatProduct(data);
@@ -99,6 +113,7 @@ async function updateProduct(id, fields) {
     gallery: fields.gallery || undefined,
     tags: fields.tags || undefined,
     actives: fields.actives || undefined,
+    sort_order: fields.sort_order != null ? fields.sort_order : undefined,
   };
   const { data, error } = await supabase.from('products').update(updateFields).eq('id', id).select('*').single();
   if (error) throw error;

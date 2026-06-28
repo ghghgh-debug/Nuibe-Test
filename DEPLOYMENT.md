@@ -4,12 +4,19 @@ This project runs an Express web server and Telegram bot together.
 
 ## Recommended free hosts
 
-1. **Render**
-   - Create a new Web Service.
-   - Set the build command: `npm install`
-   - Set the start command: `npm start`
-   - Add environment variables from `.env.example`.
-   - Render will use `Procfile` to launch `node start-all.js`.
+1. **Render (recommended)**
+    - Option A — Split services (recommended for reliability):
+       - Create a **Web Service** for the web app:
+          - Build command: `npm install`
+          - Start command: `npm run start-server` (runs `server.js`)
+          - Set `PORT` and `ADMIN_URL` env vars.
+          - Add health check `/health` (public path) for monitoring.
+       - Create a **Background Worker** for the Telegram bot:
+          - Start command: `npm run start-bot` (runs `bot.js`)
+          - Add `TELEGRAM_BOT_TOKEN` and `ADMIN_IDS` env vars.
+
+    - Option B — Single service (simpler, less reliable):
+       - Create one Web Service and use `Procfile` with `web: npm run start-all` or `web: npm run start-server` and also run the bot in same process (not recommended for long uptime).
 
 2. **Fly.io**
    - Use `fly launch` and point to `node start-all.js`.

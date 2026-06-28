@@ -9,6 +9,7 @@
     "start": "node start-all.js",
     "start-server": "node server.js",
     "start-bot": "node bot.js",
+    "start-admin-bot": "node admin-bot.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {

@@ -30,7 +30,7 @@
     <h2>Products</h2>
     <button class="button" id="new-product-btn">Create product</button>
     <table class="table" id="products-table">
-      <thead><tr><th>ID</th><th>Title</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead>
+      <thead><tr><th>ID</th><th>Order</th><th>Title</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -38,7 +38,7 @@
   <div class="card hidden" id="orders-management">
     <h2>Orders</h2>
     <table class="table" id="orders-table">
-      <thead><tr><th>ID</th><th>User</th><th>Total</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+      <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th><th>Delivery</th><th>Telegram</th><th>Total</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -47,6 +47,7 @@
     <h2 id="product-form-title">New product</h2>
     <div class="grid">
       <input class="input" id="prod-id" placeholder="Product ID" />
+      <input class="input" id="prod-sort-order" type="number" placeholder="Order" />
       <input class="input" id="prod-title" placeholder="Title" />
       <input class="input" id="prod-price" type="number" placeholder="Price" />
       <input class="input" id="prod-category" placeholder="Category" />
@@ -118,6 +119,7 @@
     productsTable.innerHTML = products.map((product) => `
       <tr>
         <td>${product.id}</td>
+        <td>${product.sort_order || 0}</td>
         <td>${product.title}</td>
         <td>${product.price}</td>
         <td>${product.category || ''}</td>
@@ -134,7 +136,11 @@
     ordersTable.innerHTML = orders.map((order) => `
       <tr>
         <td>${order.id}</td>
-        <td>${order.telegram_id || ''}</td>
+        <td>${order.customer_name || ''}</td>
+        <td>${order.customer_phone || ''}</td>
+        <td>${order.customer_address || ''}</td>
+        <td>${order.delivery_time || ''}</td>
+        <td>${order.telegram_username || order.telegram_id || ''}</td>
         <td>${order.total}</td>
         <td>${order.status}</td>
         <td>${new Date(order.created_at).toLocaleString()}</td>
@@ -151,6 +157,7 @@
     document.getElementById('product-form-title').textContent = product ? 'Edit product' : 'New product';
     editingId = product?.id || null;
     document.getElementById('prod-id').value = product?.id || '';
+    document.getElementById('prod-sort-order').value = product?.sort_order || 0;
     document.getElementById('prod-title').value = product?.title || '';
     document.getElementById('prod-price').value = product?.price || '';
     document.getElementById('prod-category').value = product?.category || '';
@@ -187,6 +194,7 @@
   document.getElementById('save-product-btn').addEventListener('click', async () => {
     const product = {
       id: document.getElementById('prod-id').value.trim(),
+      sort_order: Number(document.getElementById('prod-sort-order').value) || 0,
       title: document.getElementById('prod-title').value.trim(),
       price: Number(document.getElementById('prod-price').value),
       category: document.getElementById('prod-category').value.trim(),

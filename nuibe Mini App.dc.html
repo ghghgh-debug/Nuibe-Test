@@ -262,6 +262,23 @@
               <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted,#8C8073);"><span>{{ t.cart_shipping }}</span><span>{{ t.cart_free }}</span></div>
               <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:4px;"><span style="font-family:'Newsreader',serif; font-style:italic; font-size:18px; color:var(--ink,#241B15);">{{ t.cart_total }}</span><span style="font-size:18px; font-weight:600; color:var(--ink,#241B15); font-variant-numeric:tabular-nums;">{{ cartTotalLabel }}</span></div>
             </div>
+            <sc-if value="{{ checkoutOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px; padding:18px; background:var(--card,#fff); border:1px solid var(--line); border-radius:20px; display:flex; flex-direction:column; gap:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-size:14px; font-weight:700; color:var(--ink,#241B15);">Delivery details</div>
+                    <div style="font-size:12px; color:var(--muted,#8C8073); margin-top:2px;">Please provide your delivery address and contact details.</div>
+                  </div>
+                  <button onClick="{{ closeCheckout }}" style="border:none; background:none; color:var(--muted,#8C8073); cursor:pointer; font-size:13px;">Close</button>
+                </div>
+                <input value="{{ checkoutDraft.customer_name }}" onInput="{{ checkoutFields.customer_name }}" placeholder="Full name" style="width:100%; border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px;" />
+                <input value="{{ checkoutDraft.customer_phone }}" onInput="{{ checkoutFields.customer_phone }}" placeholder="Phone number" style="width:100%; border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px;" />
+                <input value="{{ checkoutDraft.customer_address }}" onInput="{{ checkoutFields.customer_address }}" placeholder="Delivery address" style="width:100%; border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px;" />
+                <input value="{{ checkoutDraft.delivery_time }}" onInput="{{ checkoutFields.delivery_time }}" placeholder="Preferred delivery time" style="width:100%; border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px;" />
+                <textarea value="{{ checkoutDraft.notes }}" onInput="{{ checkoutFields.notes }}" placeholder="Additional notes (optional)" rows="3" style="width:100%; border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px;"></textarea>
+                <button onClick="{{ placeOrder }}" style="width:100%; padding:14px; border:none; border-radius:16px; background:var(--ink,#241B15); color:#F4F0E8; font-size:15px; font-weight:600; cursor:pointer;">Place order · {{ cartTotalLabel }}</button>
+              </div>
+            </sc-if>
           </sc-if>
 
           <!-- Empty cart -->
@@ -760,7 +777,9 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = { tab: 'shop', category: 'All', query: '', cart: [], detailId: null, detailQty: 1, toast: '',
-      lang: 'en', currency: 'USD', wishlist: [], orders: [], skin: null, subpage: null, skinStep: 0, skinDraft: { type: '', concerns: [], time: '' }, faqOpen: -1 };
+      lang: 'en', currency: 'USD', wishlist: [], orders: [], skin: null, subpage: null, checkoutOpen: false,
+      checkoutDraft: { customer_name: '', customer_phone: '', customer_address: '', delivery_time: '', notes: '' },
+      skinStep: 0, skinDraft: { type: '', concerns: [], time: '' }, faqOpen: -1 };
 
     this.CURRENCIES = [
       { code: 'USD', label: 'US Dollar', symbol: '$', rate: 1, dp: 2, round: 0, pos: 'before' },
@@ -771,6 +790,7 @@ class Component extends DCLogic {
     this.apiBase = '/';
     this.backendAvailable = false;
     this.telegramId = this.getUrlTelegramId();
+    this.telegramUsername = this.getUrlTelegramUsername();
     this.PRODUCTS = [
       { id: 'radiance-serum', title: 'Niacinamide Serum', price: 38, category: 'Skincare', detail: 'Niacinamide 15% · 50ml', image: 'shots/serum-3126.jpg', model: 'model/serum-model-1.jpg', gallery: ['shots/serum-3126.jpg', 'model/serum-model-2.jpg', 'videos/C1071.mp4', 'videos/C1072.mp4', 'model/serum-model-1.jpg', 'products/serum-life-1.jpg', 'products/serum-life-2.jpg'], featured: 'Bestseller', tags: ['Brightening', 'Pore care', 'Dark spots'], actives: ['Niacinamide 15%', 'Panthenol 1%', 'Hyaluronic Acid 7X', 'Zinc PCA', 'Tranexamic Acid', 'AHA·BHA·PHA·LHA'], description: 'A waterfull brightening serum that cares for sebum and visible pores while gradually evening tone and fading dark spots. Lightweight, fast-absorbing, and layered with 15% niacinamide.' },
       { id: 'tone-up-cream', title: 'Niacinamide Tone Up Cream', price: 32, category: 'Skincare', detail: 'Niacinamide 5% · 50ml', image: 'shots/5152.jpg', model: 'model/cream-model-1.jpg', gallery: ['shots/5152.jpg', 'model/cream-model-3.jpg', 'videos/C1073.mp4', 'videos/C1074.mp4', 'videos/C1075.mp4', 'videos/C1076.mp4', 'videos/C1077.mp4', 'model/cream-model-1.jpg', 'products/cream-life-1.jpg', 'products/cream-life-2.jpg', 'shots/4441.jpg', 'shots/7569.jpg', 'shots/2375.jpg', 'shots/7227.jpg', 'shots/0310.jpg'], featured: '', tags: ['Tone-up', 'Glow', 'Daily'], actives: ['Niacinamide 5%', 'Panthenol 3%', 'Glutathione', 'Arbutin', 'Bakuchiol', 'Hyaluronic Acid 5X'], description: 'A moist tone-up cream that smooths on weightlessly, brightening dull skin for a soft, natural glow. Bakuchiol and glutathione support an even, healthy-looking finish day after day.' },
@@ -985,6 +1005,7 @@ class Component extends DCLogic {
     } catch (e) {}
     this.fetchRemoteProducts();
     this.fetchRemoteFaqs();
+    this.tryTelegramLogin();
   }
 
   componentWillUnmount() { clearTimeout(this._t); if (this._scrollTimer) clearInterval(this._scrollTimer); }
@@ -1080,13 +1101,50 @@ class Component extends DCLogic {
     this._t = setTimeout(() => this.setState({ toast: '' }), 1850);
   }
 
-  getUrlTelegramId() {
+  getTelegramUser() {
     try {
       const params = new URLSearchParams(window.location.search);
-      return params.get('telegram_id') || params.get('telegramId') || null;
+      const webAppId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id ? String(window.Telegram.WebApp.initDataUnsafe.user.id) : null;
+      const webAppUsername = window.Telegram?.WebApp?.initDataUnsafe?.user?.username ? String(window.Telegram.WebApp.initDataUnsafe.user.username) : null;
+      return {
+        id: params.get('telegram_id') || params.get('telegramId') || webAppId || null,
+        username: params.get('telegram_username') || params.get('telegramUsername') || webAppUsername || null,
+      };
     } catch (e) {
-      return null;
+      return { id: null, username: null };
     }
+  }
+
+  getUrlTelegramId() {
+    return this.getTelegramUser().id;
+  }
+
+  getUrlTelegramUsername() {
+    return this.getTelegramUser().username;
+  }
+
+  tryTelegramLogin() {
+    const user = this.getTelegramUser();
+    if (user.id) {
+      this.telegramId = user.id;
+      this.telegramUsername = user.username;
+      this.setState({});
+      return true;
+    }
+    return false;
+  }
+
+  signIn() {
+    if (this.tryTelegramLogin()) {
+      this.showToast('Telegram connected');
+      return;
+    }
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      this.showToast('Open this mini app from Telegram to sign in');
+      return;
+    }
+    alert('Please open this page from the Telegram app using the bot button.');
   }
 
   api(path, options = {}) {
@@ -1158,22 +1216,52 @@ class Component extends DCLogic {
   openDetail(id) { this.setState({ detailId: id, detailQty: 1 }); }
   closeDetail() { this.setState({ detailId: null }); }
 
-  checkout() {
+  openCheckout() {
+    if (!this.state.cart.length) return;
+    this.setState({ checkoutOpen: true });
+  }
+
+  closeCheckout() {
+    this.setState({ checkoutOpen: false });
+  }
+
+  setCheckoutField(field, value) {
+    this.setState((s) => ({ checkoutDraft: { ...s.checkoutDraft, [field]: value } }));
+  }
+
+  placeOrder() {
     const s = this.state;
     if (!s.cart.length) return;
+    const { customer_name, customer_phone, customer_address, delivery_time } = s.checkoutDraft;
+    if (!customer_name.trim() || !customer_phone.trim() || !customer_address.trim() || !delivery_time.trim()) {
+      return alert('Please provide your name, phone, address and preferred delivery time.');
+    }
     const items = s.cart.map((ci) => { const p = this.PRODUCTS.find((x) => x.id === ci.id); return { id: ci.id, title: p.title, qty: ci.qty, price: p.price, image: p.image }; });
     const total = items.reduce((a, c) => a + c.price * c.qty, 0);
     const order = { id: 'NB' + String(Date.now()).slice(-6), at: Date.now(), items, total, count: items.reduce((a, c) => a + c.qty, 0) };
     const orders = [order, ...s.orders];
     this.persist('orders', orders);
+    const payload = {
+      telegramId: this.telegramId,
+      telegram_username: this.telegramUsername,
+      id: order.id,
+      total,
+      items,
+      status: 'processing',
+      customer_name: customer_name.trim(),
+      customer_phone: customer_phone.trim(),
+      customer_address: customer_address.trim(),
+      delivery_time: delivery_time.trim(),
+      notes: s.checkoutDraft.notes.trim(),
+    };
     if (this.telegramId) {
-      this.api('/api/orders', { method: 'POST', body: { telegramId: this.telegramId, id: order.id, total, items, status: 'processing' } })
+      this.api('/api/orders', { method: 'POST', body: payload })
         .then(() => { this.showToast(this.tr('toast_order')); })
         .catch(() => { this.showToast(this.tr('toast_order')); });
     } else {
       this.showToast(this.tr('toast_order'));
     }
-    this.setState({ cart: [], orders, subpage: 'orders', tab: 'profile' });
+    this.setState({ cart: [], orders, subpage: 'orders', tab: 'profile', checkoutOpen: false, checkoutDraft: { customer_name: '', customer_phone: '', customer_address: '', delivery_time: '', notes: '' } });
   }
 
   thumbEl(src, alt) {
@@ -1403,6 +1491,16 @@ class Component extends DCLogic {
       gridTitle: s.category === 'All' ? t.grid_all : (t['cat_' + s.category] || s.category),
       productCountLabel: products.length + ' ' + (products.length === 1 ? t.item : t.items),
       cart, cartCount, cartTotalLabel: this.money(cartTotal), cartHasItems, cartEmpty: !cartHasItems,
+      checkoutOpen: s.checkoutOpen,
+      checkoutDraft: s.checkoutDraft,
+      checkoutFields: {
+        customer_name: (e) => this.setCheckoutField('customer_name', e.target.value),
+        customer_phone: (e) => this.setCheckoutField('customer_phone', e.target.value),
+        customer_address: (e) => this.setCheckoutField('customer_address', e.target.value),
+        delivery_time: (e) => this.setCheckoutField('delivery_time', e.target.value),
+        notes: (e) => this.setCheckoutField('notes', e.target.value),
+      },
+      openCheckout: () => this.openCheckout(), closeCheckout: () => this.closeCheckout(), placeOrder: () => this.placeOrder(),
       headerBadge: cartCount > 0,
       query: s.query, onQuery: (e) => this.setState({ query: e.target.value }), hasQuery, clearQuery: () => this.setState({ query: '' }),
       showSuggest: !hasQuery, showResults: hasQuery && searchResults.length > 0, showNoResults: hasQuery && searchResults.length === 0,
@@ -1410,7 +1508,7 @@ class Component extends DCLogic {
       detailOpen, detail, detailQty, detailTotalLabel,
       closeDetail: () => this.closeDetail(),
       mbVisible, mbLabel, mbSub, mbAction,
-      menu, signIn: () => this.showToast(this.tr('toast_tg')),
+      menu, signIn: () => this.signIn(),
       toast: s.toast, toastOpen: !!s.toast,
     };
   }

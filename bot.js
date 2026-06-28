@@ -10,10 +10,6 @@ if (!token) {
 
 const bot = new Telegraf(token);
 
-async function isAdmin(userId) {
-  return await db.isAdminId(String(userId));
-}
-
 function getWebAppUrl() {
   return process.env.WEB_APP_URL || process.env.ADMIN_URL || 'https://nuibe-test.onrender.com';
 }
@@ -21,7 +17,7 @@ function getWebAppUrl() {
 function getMainKeyboard() {
   return Markup.keyboard([
     ['🛍️ Shop', '❓ FAQ'],
-    ['📦 My Orders', '👤 Admin panel']
+    ['📦 My Orders']
   ]).resize();
 }
 
@@ -37,12 +33,6 @@ bot.start(async (ctx) => {
   const greeting = `Welcome to Nuibe!\n\nI can help you browse products, answer FAQs, and show your orders.`;
   await ctx.reply(greeting, getMainKeyboard());
   await ctx.reply('Open the mini app in Telegram:', getShopButton());
-  if (await isAdmin(ctx.from.id)) {
-    await ctx.reply('Admin dashboard:', Markup.inlineKeyboard([[{
-      text: 'Open Admin Dashboard',
-      web_app: { url: `${getWebAppUrl()}/admin.html` },
-    }]]));
-  }
 });
 
 bot.command('shop', async (ctx) => {
@@ -96,32 +86,8 @@ bot.hears('📦 My Orders', async (ctx) => {
   await ctx.reply(`Your recent orders:\n\n${list}`);
 });
 
-bot.hears('👤 Admin panel', async (ctx) => {
-  if (!(await isAdmin(ctx.from.id))) {
-    return ctx.reply('Access denied. This section is for admin accounts only.');
-  }
-  await ctx.reply('Admin commands: /admin_orders, /admin_link');
-});
-
 bot.command('help', async (ctx) => {
-  await ctx.reply('Use the buttons or commands:\n/start — Start the bot\n/shop — Open the mini app\n/products — Browse latest items\n/faq — Frequently asked questions\n/orders — Your order status\n/admin_orders — Admin only\n/admin_link — Admin panel link', getMainKeyboard());
-});
-
-bot.command('admin_orders', async (ctx) => {
-  if (!(await isAdmin(ctx.from.id))) return ctx.reply('Admin access required.');
-  const orders = await db.getAllOrders();
-  if (!orders.length) return ctx.reply('There are no orders yet.');
-  const first = orders.slice(0, 5).map((order) => `#${order.id} — ${order.status}\n${(order.items || []).length} item(s) • ${order.total}$`).join('\n\n');
-  await ctx.reply(`Recent orders:\n\n${first}`);
-});
-
-bot.command('admin_link', async (ctx) => {
-  if (!(await isAdmin(ctx.from.id))) return ctx.reply('Admin access required.');
-  const url = `${getWebAppUrl()}/admin.html`;
-  await ctx.reply('Open the admin dashboard:', Markup.inlineKeyboard([[{
-    text: 'Open Admin Dashboard',
-    web_app: { url },
-  }]]));
+  await ctx.reply('Use the buttons or commands:\n/start — Start the bot\n/shop — Open the mini app\n/products — Browse latest items\n/faq — Frequently asked questions\n/orders — Your order status', getMainKeyboard());
 });
 
 async function configureBot() {
@@ -132,14 +98,12 @@ async function configureBot() {
     { command: 'products', description: 'Browse latest items' },
     { command: 'faq', description: 'Frequently asked questions' },
     { command: 'orders', description: 'Your order status' },
-    { command: 'admin_orders', description: 'Admin: list recent orders' },
-    { command: 'admin_link', description: 'Admin: open admin dashboard' },
     { command: 'help', description: 'Show help and quick commands' },
   ];
 
   await bot.telegram.setMyCommands(commands);
-  await bot.telegram.setMyDescription({ description: 'Nuibe mini shop inside Telegram — browse products, FAQ, orders, and admin tools.' });
-  await bot.telegram.setMyShortDescription({ short_description: 'Shop, FAQ, orders, and admin dashboard' });
+  await bot.telegram.setMyDescription({ description: 'Nuibe mini shop inside Telegram — browse products, FAQ, and orders.' });
+  await bot.telegram.setMyShortDescription({ short_description: 'Shop, FAQ, orders' });
   await bot.telegram.setChatMenuButton({
     menu_button: {
       type: 'web_app',
@@ -160,20 +124,8 @@ bot.launch().then(() => {
       console.log('Web app URL:', webUrl);
 
       await configureBot();
-
-      const adminIds = (process.env.ADMIN_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
-      if (adminIds.length) {
-        const text = `Web app is live: ${webUrl}\nOpen in Telegram: ${botLink}`;
-        for (const id of adminIds) {
-          try {
-            await bot.telegram.sendMessage(id, text, getShopButton());
-          } catch (err) {
-            console.warn('Failed to notify admin', id, err && err.message);
-          }
-        }
-      }
     } catch (err) {
-      console.warn('Failed to fetch bot info or notify admins:', err && err.message);
+      console.warn('Failed to fetch bot info:', err && err.message);
     }
   })();
 });
