@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuibe Admin Dashboard</title>
+<style>
+  body { margin:0; font-family: 'Geist', sans-serif; background:#F5F1EB; color:#241B15; }
+  .page { max-width:1200px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border:1px solid rgba(36,27,21,0.08); border-radius:20px; box-shadow:0 18px 45px -30px rgba(36,27,21,0.2); padding:20px; margin-bottom:20px; }
+  h1, h2 { margin:0 0 14px; }
+  .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
+  .button { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border:none; border-radius:14px; background:#241B15; color:#fff; cursor:pointer; }
+  .input, .textarea, .select { width:100%; font:inherit; border:1px solid rgba(36,27,21,0.12); border-radius:14px; padding:12px 14px; background:#F9F7F4; color:#241B15; }
+  .table { width:100%; border-collapse: collapse; }
+  .table th, .table td { padding:12px 14px; border-bottom:1px solid rgba(36,27,21,0.08); text-align:left; }
+  .table th { background:#F4F0E8; }
+  .badge { display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; background:#EEF0F1; color:#241B15; font-size:12px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Nuibe Admin Dashboard</h1>
+  <div class="card" id="admin-status">
+    <p>Checking admin access...</p>
+  </div>
+
+  <div class="card hidden" id="product-management">
+    <h2>Products</h2>
+    <button class="button" id="new-product-btn">Create product</button>
+    <table class="table" id="products-table">
+      <thead><tr><th>ID</th><th>Title</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card hidden" id="orders-management">
+    <h2>Orders</h2>
+    <table class="table" id="orders-table">
+      <thead><tr><th>ID</th><th>User</th><th>Total</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card hidden" id="product-form-card">
+    <h2 id="product-form-title">New product</h2>
+    <div class="grid">
+      <input class="input" id="prod-id" placeholder="Product ID" />
+      <input class="input" id="prod-title" placeholder="Title" />
+      <input class="input" id="prod-price" type="number" placeholder="Price" />
+      <input class="input" id="prod-category" placeholder="Category" />
+      <input class="input" id="prod-detail" placeholder="Detail" />
+      <input class="input" id="prod-image" placeholder="Image URL" />
+      <input class="input" id="prod-model" placeholder="Model image URL" />
+      <input class="input" id="prod-featured" placeholder="Featured label" />
+      <textarea class="textarea" id="prod-description" rows="4" placeholder="Description"></textarea>
+      <textarea class="textarea" id="prod-gallery" rows="3" placeholder="Gallery JSON array"></textarea>
+      <textarea class="textarea" id="prod-tags" rows="2" placeholder="Tags JSON array"></textarea>
+      <textarea class="textarea" id="prod-actives" rows="2" placeholder="Actives JSON array"></textarea>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="button" id="save-product-btn">Save product</button>
+      <button class="button" id="cancel-product-btn" style="background:#8D8D8D;">Cancel</button>
+    </div>
+  </div>
+</div>
+<script>
+  const telegramId = new URLSearchParams(window.location.search).get('telegram_id');
+  const headers = telegramId ? { 'X-Telegram-Id': telegramId } : {};
+
+  async function api(path, options = {}) {
+    const res = await fetch(path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...headers }, ...options });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || res.statusText);
+    }
+    return res.json();
+  }
+
+  const statusEl = document.getElementById('admin-status');
+  const productSection = document.getElementById('product-management');
+  const ordersSection = document.getElementById('orders-management');
+  const formCard = document.getElementById('product-form-card');
+  const productsTable = document.querySelector('#products-table tbody');
+  const ordersTable = document.querySelector('#orders-table tbody');
+
+  let editingId = null;
+
+  async function init() {
+    try {
+      const status = await api('/api/admin/check');
+      statusEl.innerHTML = `<p>Signed in as <strong>${status.telegramId || 'unknown'}</strong>. Admin access: <strong>${status.isAdmin}</strong>.</p>`;
+      if (!status.isAdmin) return;
+      productSection.classList.remove('hidden');
+      ordersSection.classList.remove('hidden');
+      formCard.classList.add('hidden');
+      await loadProducts();
+      await loadOrders();
+    } catch (error) {
+      statusEl.innerHTML = `<p style="color:#B00020;">Admin access failed: ${error.message}</p>`;
+    }
+  }
+
+  async function loadProducts() {
+    const products = await api('/api/admin/products');
+    productsTable.innerHTML = products.map((product) => `
+      <tr>
+        <td>${product.id}</td>
+        <td>${product.title}</td>
+        <td>${product.price}</td>
+        <td>${product.category || ''}</td>
+        <td>
+          <button onclick="editProduct('${product.id}')">Edit</button>
+          <button onclick="deleteProduct('${product.id}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadOrders() {
+    const orders = await api('/api/admin/orders');
+    ordersTable.innerHTML = orders.map((order) => `
+      <tr>
+        <td>${order.id}</td>
+        <td>${order.telegram_id || ''}</td>
+        <td>${order.total}</td>
+        <td>${order.status}</td>
+        <td>${new Date(order.created_at).toLocaleString()}</td>
+        <td>
+          <button onclick="updateOrderStatus('${order.id}')">Change status</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function toggleForm(show, product = null) {
+    formCard.classList.toggle('hidden', !show);
+    if (!show) return;
+    document.getElementById('product-form-title').textContent = product ? 'Edit product' : 'New product';
+    editingId = product?.id || null;
+    document.getElementById('prod-id').value = product?.id || '';
+    document.getElementById('prod-title').value = product?.title || '';
+    document.getElementById('prod-price').value = product?.price || '';
+    document.getElementById('prod-category').value = product?.category || '';
+    document.getElementById('prod-detail').value = product?.detail || '';
+    document.getElementById('prod-image').value = product?.image || '';
+    document.getElementById('prod-model').value = product?.model || '';
+    document.getElementById('prod-featured').value = product?.featured || '';
+    document.getElementById('prod-description').value = product?.description || '';
+    document.getElementById('prod-gallery').value = JSON.stringify(product?.gallery || [], null, 2);
+    document.getElementById('prod-tags').value = JSON.stringify(product?.tags || [], null, 2);
+    document.getElementById('prod-actives').value = JSON.stringify(product?.actives || [], null, 2);
+  }
+
+  window.editProduct = async (id) => {
+    const product = (await api('/api/products/' + id));
+    toggleForm(true, product);
+  };
+
+  window.deleteProduct = async (id) => {
+    if (!confirm('Delete this product?')) return;
+    await api('/api/admin/products/' + id, { method: 'DELETE' });
+    await loadProducts();
+  };
+
+  window.updateOrderStatus = async (id) => {
+    const status = prompt('New order status:', 'shipped');
+    if (!status) return;
+    await api(`/api/admin/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+    await loadOrders();
+  };
+
+  document.getElementById('new-product-btn').addEventListener('click', () => toggleForm(true));
+  document.getElementById('cancel-product-btn').addEventListener('click', () => toggleForm(false));
+  document.getElementById('save-product-btn').addEventListener('click', async () => {
+    const product = {
+      id: document.getElementById('prod-id').value.trim(),
+      title: document.getElementById('prod-title').value.trim(),
+      price: Number(document.getElementById('prod-price').value),
+      category: document.getElementById('prod-category').value.trim(),
+      detail: document.getElementById('prod-detail').value.trim(),
+      image: document.getElementById('prod-image').value.trim(),
+      model: document.getElementById('prod-model').value.trim(),
+      featured: document.getElementById('prod-featured').value.trim(),
+      description: document.getElementById('prod-description').value.trim(),
+      gallery: JSON.parse(document.getElementById('prod-gallery').value || '[]'),
+      tags: JSON.parse(document.getElementById('prod-tags').value || '[]'),
+      actives: JSON.parse(document.getElementById('prod-actives').value || '[]'),
+    };
+    const method = editingId ? 'PUT' : 'POST';
+    const path = editingId ? `/api/admin/products/${editingId}` : '/api/admin/products';
+    await api(path, { method, body: JSON.stringify(product) });
+    await loadProducts();
+    toggleForm(false);
+  });
+
+  init();
+</script>
+</body>
+</html>
